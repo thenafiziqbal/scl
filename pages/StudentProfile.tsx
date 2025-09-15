@@ -52,7 +52,7 @@ const StudentProfile: React.FC = () => {
                     <h3 className="text-xl font-bold text-primary mb-4">ক্লাস টেস্টের ফলাফল</h3>
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-light">
+                            <thead className="bg-sidebar text-white">
                                 <tr>
                                     <th className="p-3 text-left">পরীক্ষার নাম</th>
                                     <th className="p-3 text-left">বিষয়</th>
@@ -63,10 +63,10 @@ const StudentProfile: React.FC = () => {
                             <tbody>
                                 {studentMarks.map(mark => (
                                     <tr key={mark.id} className="border-b">
-                                        <td className="p-3">{mark.examName}</td>
-                                        <td className="p-3">{mark.subject}</td>
-                                        <td className="p-3 text-center">{mark.marksObtained}</td>
-                                        <td className="p-3 text-center">{mark.totalMarks}</td>
+                                        <td className="p-3 text-gray-800">{mark.examName}</td>
+                                        <td className="p-3 text-gray-700">{mark.subject}</td>
+                                        <td className="p-3 text-center text-accent font-semibold">{mark.marksObtained}</td>
+                                        <td className="p-3 text-center text-gray-700">{mark.totalMarks}</td>
                                     </tr>
                                 ))}
                                 {studentMarks.length === 0 && <tr><td colSpan={4} className="p-3 text-center text-gray-500">কোনো ফলাফল পাওয়া যায়নি।</td></tr>}
@@ -79,7 +79,7 @@ const StudentProfile: React.FC = () => {
                     <h3 className="text-xl font-bold text-primary mb-4">লাইব্রেরি থেকে গৃহীত বই</h3>
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                             <thead className="bg-light">
+                             <thead className="bg-sidebar text-white">
                                 <tr>
                                     <th className="p-3 text-left">বইয়ের নাম</th>
                                     <th className="p-3 text-left">ইস্যুর তারিখ</th>
@@ -90,9 +90,9 @@ const StudentProfile: React.FC = () => {
                             <tbody>
                                {studentIssuedBooks.map(issue => (
                                    <tr key={issue.id} className="border-b">
-                                       <td className="p-3">{issue.bookTitle}</td>
-                                       <td className="p-3">{issue.issueDate}</td>
-                                       <td className="p-3">{issue.dueDate}</td>
+                                       <td className="p-3 text-gray-800">{issue.bookTitle}</td>
+                                       <td className="p-3 text-gray-700">{issue.issueDate}</td>
+                                       <td className="p-3 text-gray-700">{issue.dueDate}</td>
                                        <td className="p-3 text-center">
                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${issue.status === 'issued' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
                                                {issue.status === 'issued' ? 'ইস্যুকৃত' : 'ফেরত হয়েছে'}

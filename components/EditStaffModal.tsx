@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Student, Class, Section } from '../types';
+import { Teacher, Librarian } from '../types';
 
-interface EditStudentModalProps {
-    student: Student;
-    classes: { [id: string]: Class };
-    sections: { [id: string]: Section };
+// A unified type for the modal's data, combining properties from both staff types
+export type StaffData = (Teacher | Librarian) & { role: 'শিক্ষক' | 'লাইব্রেরিয়ান', details: string };
+
+interface EditStaffModalProps {
+    staff: StaffData;
     onClose: () => void;
-    onSave: (student: Student) => void;
+    onSave: (staff: StaffData) => void;
 }
 
-const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, sections, onClose, onSave }) => {
-    const [formData, setFormData] = useState<Student>(student);
+const EditStaffModal: React.FC<EditStaffModalProps> = ({ staff, onClose, onSave }) => {
+    const [formData, setFormData] = useState<StaffData>(staff);
 
     useEffect(() => {
-        setFormData(student);
-    }, [student]);
+        setFormData(staff);
+    }, [staff]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: name === 'roll' ? parseInt(value) || 0 : value }));
+        setFormData(prev => ({ ...prev, [name]: value } as StaffData));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -26,47 +27,36 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, s
         onSave(formData);
     };
 
-    // Consistent dark theme for form fields
     const fieldClasses = "w-full p-2 border border-gray-600 rounded-md shadow-sm bg-accent text-light focus:ring-secondary focus:border-secondary";
-    // For select options, ensure they are readable
     const optionClasses = "bg-white text-gray-800";
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4 font-sans">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 transform transition-all animate-scaleIn">
                 <div className="flex justify-between items-center border-b pb-3 mb-5">
-                    <h2 className="text-xl font-bold text-primary">ছাত্রের তথ্য এডিট করুন</h2>
+                    <h2 className="text-xl font-bold text-primary">স্টাফের তথ্য এডিট করুন</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-danger text-2xl">&times;</button>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         <div className="space-y-1">
-                            <label className="font-medium text-gray-700">ছাত্রের নাম</label>
+                            <label className="font-medium text-gray-700">নাম</label>
                             <input type="text" name="name" value={formData.name} onChange={handleChange} required className={fieldClasses}/>
                         </div>
                         <div className="space-y-1">
-                            <label className="font-medium text-gray-700">রোল</label>
-                            <input type="number" name="roll" value={formData.roll} onChange={handleChange} required className={fieldClasses}/>
-                        </div>
-                        <div className="space-y-1">
-                            <label className="font-medium text-gray-700">ক্লাস</label>
-                            <select name="className" value={formData.className} onChange={handleChange} required className={fieldClasses}>
-                                {Object.values(classes).map(c => <option key={c.id} value={c.name} className={optionClasses}>{c.name}</option>)}
+                            <label className="font-medium text-gray-700">পদ</label>
+                            <select name="role" value={formData.role} onChange={handleChange} required className={fieldClasses}>
+                                <option value="শিক্ষক" className={optionClasses}>শিক্ষক</option>
+                                <option value="লাইব্রেরিয়ান" className={optionClasses}>লাইব্রেরিয়ান</option>
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="font-medium text-gray-700">বিভাগ</label>
-                            <select name="section" value={formData.section} onChange={handleChange} required className={fieldClasses}>
-                                {Object.values(sections).map(s => <option key={s.id} value={s.name} className={optionClasses}>{s.name}</option>)}
-                            </select>
+                            <label className="font-medium text-gray-700">{formData.role === 'শিক্ষক' ? 'বিষয়' : 'দায়িত্ব'}</label>
+                            <input type="text" name="details" value={formData.details} onChange={handleChange} required className={fieldClasses}/>
                         </div>
                         <div className="space-y-1">
-                            <label className="font-medium text-gray-700">অভিভাবকের নাম</label>
-                            <input type="text" name="guardianName" value={formData.guardianName} onChange={handleChange} required className={fieldClasses}/>
-                        </div>
-                        <div className="space-y-1">
-                            <label className="font-medium text-gray-700">যোগাযোগ</label>
-                            <input type="text" name="contact" value={formData.contact} onChange={handleChange} required className={fieldClasses}/>
+                            <label className="font-medium text-gray-700">ইমেইল</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} required className={fieldClasses}/>
                         </div>
                         <div className="space-y-1 md:col-span-2">
                             <label className="font-medium text-gray-700">প্রোফাইল ছবির URL</label>
@@ -79,7 +69,7 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, s
                     </div>
                 </form>
             </div>
-            <style>{`
+             <style>{`
                 @keyframes scaleIn {
                     from { transform: scale(0.9); opacity: 0; }
                     to { transform: scale(1); opacity: 1; }
@@ -90,4 +80,4 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, s
     );
 };
 
-export default EditStudentModal;
+export default EditStaffModal;

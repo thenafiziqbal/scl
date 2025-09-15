@@ -22,7 +22,7 @@ const LibraryManagement: React.FC = () => {
                 <h3 className="text-lg font-bold text-primary mb-4">লাইব্রেরির সকল বই</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-light">
+                        <thead className="bg-sidebar text-white">
                             <tr>
                                 <th className="p-3">বইয়ের নাম</th>
                                 <th className="p-3">লেখক</th>
@@ -34,10 +34,10 @@ const LibraryManagement: React.FC = () => {
                         <tbody>
                             {Object.values(library.books).map(book => (
                                 <tr key={book.id} className="border-b">
-                                    <td className="p-3">{book.title}</td>
-                                    <td className="p-3">{book.author}</td>
-                                    <td className="p-3">{book.totalQuantity}</td>
-                                    <td className="p-3">{book.availableQuantity}</td>
+                                    <td className="p-3 text-accent font-medium">{book.title}</td>
+                                    <td className="p-3 text-gray-700">{book.author}</td>
+                                    <td className="p-3 text-gray-700">{book.totalQuantity}</td>
+                                    <td className="p-3 text-gray-700">{book.availableQuantity}</td>
                                     <td className="p-3"><button className="text-danger"><i className="fas fa-trash"></i></button></td>
                                 </tr>
                             ))}
@@ -62,7 +62,7 @@ const LibraryManagement: React.FC = () => {
                      <h3 className="text-lg font-bold text-primary mb-4">ইস্যুকৃত বইয়ের তালিকা</h3>
                      <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-light">
+                            <thead className="bg-sidebar text-white">
                                 <tr>
                                     <th className="p-3">বইয়ের নাম</th>
                                     <th className="p-3">ছাত্রের নাম</th>
@@ -73,8 +73,8 @@ const LibraryManagement: React.FC = () => {
                             <tbody>
                                 {issuedBooks.map(issue => (
                                     <tr key={issue.id} className="border-b">
-                                        <td className="p-3">{library.books[issue.bookId]?.title}</td>
-                                        <td className="p-3">{students[issue.studentId]?.name}</td>
+                                        <td className="p-3 text-gray-800">{library.books[issue.bookId]?.title}</td>
+                                        <td className="p-3 text-accent font-medium">{students[issue.studentId]?.name}</td>
                                         <td className="p-3">
                                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${issue.status === 'issued' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
                                                {issue.status === 'issued' ? 'ইস্যুকৃত' : 'ফেরত হয়েছে'}

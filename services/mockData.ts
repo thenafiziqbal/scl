@@ -2,10 +2,10 @@ import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest,
 
 // Single source of truth for all users who can log in.
 export const MOCK_USERS: { [uid: string]: User } = {
-    'admin1': { uid: 'admin1', email: 'admin@school.com', name: 'অধ্যক্ষ', role: 'admin' },
-    'teacher1': { uid: 'teacher1', email: 'teacher@school.com', name: 'মোঃ রফিক হাসান', role: 'teacher', subject: 'গণিত' },
-    'teacher2': { uid: 'teacher2', email: 'teacher2@school.com', name: 'শাহনাজ পারভীন', role: 'teacher', subject: 'বাংলা' },
-    'librarian1': { uid: 'librarian1', email: 'librarian@school.com', name: 'সেলিনা আক্তার', role: 'librarian' }
+    'admin1': { uid: 'admin1', email: 'admin@school.com', name: 'অধ্যক্ষ', role: 'admin', password: 'password' },
+    'teacher1': { uid: 'teacher1', email: 'teacher@school.com', name: 'মোঃ রফিক হাসান', role: 'teacher', subject: 'গণিত', password: 'password' },
+    'teacher2': { uid: 'teacher2', email: 'teacher2@school.com', name: 'শাহনাজ পারভীন', role: 'teacher', subject: 'বাংলা', password: 'password' },
+    'librarian1': { uid: 'librarian1', email: 'librarian@school.com', name: 'সেলিনা আক্তার', role: 'librarian', password: 'password' }
 };
 
 

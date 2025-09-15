@@ -4,7 +4,7 @@ import { MOCK_USERS, MOCK_SCHOOL_SETTINGS, MOCK_STUDENTS, MOCK_TEACHERS, MOCK_LI
 
 interface AppContextType {
     user: User | null;
-    login: (email: string) => boolean;
+    login: (email: string, password: string) => boolean;
     logout: () => void;
     settings: SchoolSettings;
     students: { [id: string]: Student };
@@ -24,6 +24,8 @@ interface AppContextType {
     invigilatorRosters: InvigilatorRoster;
     addStudent: (student: Omit<Student, 'id'>) => void;
     updateStudent: (studentId: string, updatedData: Partial<Student>) => void;
+    updateTeacher: (teacherId: string, updatedData: Partial<Teacher>) => void;
+    updateLibrarian: (librarianId: string, updatedData: Partial<Librarian>) => void;
     addMainExam: (exam: Omit<MainExam, 'id'>) => void;
     deleteMainExam: (id: string) => void;
     addRoom: (room: Omit<Room, 'id'>) => void;
@@ -52,15 +54,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [rooms, setRooms] = useState<{ [id: string]: Room }>(MOCK_ROOMS);
     const [invigilatorRosters, setInvigilatorRosters] = useState<InvigilatorRoster>(MOCK_INVIGILATOR_ROSTERS);
 
-    const login = (email: string): boolean => {
-        const foundUser = Object.values(MOCK_USERS).find(u => u.email === email);
+    const login = (email: string, password: string): boolean => {
+        const foundUser = Object.values(MOCK_USERS).find(u => u.email === email && u.password === password);
         if (foundUser) {
-            let fullUserProfile: User = { ...foundUser };
-            if (foundUser.role === 'teacher' && MOCK_TEACHERS[foundUser.uid]) {
-                const teacherProfile = MOCK_TEACHERS[foundUser.uid];
+            const { password: _, ...userWithoutPassword } = foundUser;
+            
+            let fullUserProfile: User = { ...userWithoutPassword };
+
+            if (userWithoutPassword.role === 'teacher' && MOCK_TEACHERS[userWithoutPassword.uid]) {
+                const teacherProfile = MOCK_TEACHERS[userWithoutPassword.uid];
                 fullUserProfile = { ...fullUserProfile, ...teacherProfile };
-            } else if (foundUser.role === 'librarian' && MOCK_LIBRARIANS[foundUser.uid]) {
-                const librarianProfile = MOCK_LIBRARIANS[foundUser.uid];
+            } else if (userWithoutPassword.role === 'librarian' && MOCK_LIBRARIANS[userWithoutPassword.uid]) {
+                const librarianProfile = MOCK_LIBRARIANS[userWithoutPassword.uid];
                 fullUserProfile = { ...fullUserProfile, ...librarianProfile };
             }
             setUser(fullUserProfile);
@@ -83,6 +88,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setStudents(prev => ({
             ...prev,
             [studentId]: { ...prev[studentId], ...updatedData }
+        }));
+    };
+
+    const updateTeacher = (teacherId: string, updatedData: Partial<Teacher>) => {
+        setTeachers(prev => ({
+            ...prev,
+            [teacherId]: { ...prev[teacherId], ...updatedData }
+        }));
+    };
+
+    const updateLibrarian = (librarianId: string, updatedData: Partial<Librarian>) => {
+        setLibrarians(prev => ({
+            ...prev,
+            [librarianId]: { ...prev[librarianId], ...updatedData }
         }));
     };
 
@@ -146,6 +165,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         invigilatorRosters,
         addStudent,
         updateStudent,
+        updateTeacher,
+        updateLibrarian,
         addMainExam,
         deleteMainExam,
         addRoom,

@@ -30,7 +30,7 @@ const StudentList: React.FC = () => {
                 <h2 className="text-xl font-bold text-primary mb-4">ছাত্র তালিকা</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-light">
+                        <thead className="bg-sidebar text-white">
                             <tr>
                                 <th className="p-4 font-semibold">ছবি</th>
                                 <th className="p-4 font-semibold">নাম</th>
@@ -50,9 +50,9 @@ const StudentList: React.FC = () => {
                                             onError={(e) => (e.currentTarget.src = 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png')}
                                         />
                                     </td>
-                                    <td className="p-4 font-medium">{student.name}</td>
-                                    <td className="p-4">{student.className} ({student.section})</td>
-                                    <td className="p-4">{student.roll}</td>
+                                    <td className="p-4 font-medium text-accent">{student.name}</td>
+                                    <td className="p-4 text-gray-700">{student.className} ({student.section})</td>
+                                    <td className="p-4 text-gray-700">{student.roll}</td>
                                     <td className="p-4">
                                         <div className="flex items-center space-x-2">
                                             <button 

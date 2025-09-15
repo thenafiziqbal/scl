@@ -16,7 +16,7 @@ const StudentLeaves: React.FC = () => {
                 <h2 className="text-xl font-bold text-primary mb-4">ছুটিতে থাকা ছাত্রদের তালিকা</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-light">
+                        <thead className="bg-sidebar text-white">
                             <tr>
                                 <th className="p-4 font-semibold">ছাত্রের নাম</th>
                                 <th className="p-4 font-semibold">ক্লাস</th>
@@ -31,11 +31,11 @@ const StudentLeaves: React.FC = () => {
                                 const student = students[leave.studentId];
                                 return (
                                     <tr key={leave.id} className="border-b">
-                                        <td className="p-4">{student?.name || 'N/A'}</td>
-                                        <td className="p-4">{student ? `${student.className} (${student.section})` : 'N/A'}</td>
-                                        <td className="p-4">{leave.reason}</td>
-                                        <td className="p-4">{leave.startDate}</td>
-                                        <td className="p-4">{leave.endDate}</td>
+                                        <td className="p-4 text-accent font-medium">{student?.name || 'N/A'}</td>
+                                        <td className="p-4 text-gray-700">{student ? `${student.className} (${student.section})` : 'N/A'}</td>
+                                        <td className="p-4 text-gray-700">{leave.reason}</td>
+                                        <td className="p-4 text-gray-700">{leave.startDate}</td>
+                                        <td className="p-4 text-gray-700">{leave.endDate}</td>
                                         <td className="p-4">
                                             <button className="text-danger text-xl hover:text-red-800"><i className="fas fa-trash"></i></button>
                                         </td>

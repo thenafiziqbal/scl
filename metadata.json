@@ -1,5 +1,5 @@
 {
-  "name": "Advanced School Management System",
+  "name": "Copy of Advanced School Management System",
   "description": "A comprehensive school management system built with React, TypeScript, and Tailwind CSS. It allows for managing students, staff, schedules, attendance, exams, and a library, with role-based access for admins, teachers, and librarians.",
   "requestFramePermissions": []
 }
