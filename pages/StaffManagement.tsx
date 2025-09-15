@@ -1,12 +1,12 @@
-
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import EditStaffModal, { StaffData } from '../components/EditStaffModal';
 import { Teacher, Librarian } from '../types';
 
 const StaffManagement: React.FC = () => {
-    const { teachers, librarians, updateTeacher, updateLibrarian } = useApp();
+    const { teachers, librarians, addTeacher, updateTeacher, addLibrarian, updateLibrarian } = useApp();
     const [editingStaff, setEditingStaff] = useState<StaffData | null>(null);
+    const [isAddingStaff, setIsAddingStaff] = useState(false);
 
     const allStaff: StaffData[] = [
         ...Object.values(teachers).map(t => ({ ...t, role: 'শিক্ষক' as const, details: t.subject })),
@@ -36,17 +36,46 @@ const StaffManagement: React.FC = () => {
         setEditingStaff(null);
         alert('স্টাফের তথ্য সফলভাবে আপডেট করা হয়েছে!');
     };
+    
+    const handleAddStaff = (newStaff: StaffData) => {
+        const { id, role, details, ...rest } = newStaff;
+        if (role === 'শিক্ষক') {
+            const teacherData: Omit<Teacher, 'id'> = {
+                name: rest.name,
+                email: rest.email,
+                phone: rest.phone,
+                profilePicUrl: rest.profilePicUrl,
+                subject: details,
+            };
+            addTeacher(teacherData);
+        } else {
+            const librarianData: Omit<Librarian, 'id'> = {
+                name: rest.name,
+                email: rest.email,
+                phone: rest.phone,
+                profilePicUrl: rest.profilePicUrl,
+            };
+            addLibrarian(librarianData);
+        }
+        setIsAddingStaff(false);
+        alert('নতুন স্টাফ সফলভাবে যোগ করা হয়েছে!');
+    };
+
+    const defaultStaff: StaffData = {
+        id: '', name: '', email: '', phone: '', role: 'শিক্ষক', details: '', profilePicUrl: ''
+    };
+
 
     return (
         <>
             <div className="space-y-8">
                 <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <h2 className="text-xl font-bold text-primary mb-4">নতুন স্টাফ যোগ করুন</h2>
-                    {/* Add Staff Form would go here */}
-                    <p className="text-gray-500">নতুন স্টাফ যোগ করার ফর্ম এখানে যোগ করা হবে।</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <h2 className="text-xl font-bold text-primary mb-4">স্টাফদের তালিকা</h2>
+                    <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
+                        <h2 className="text-xl font-bold text-primary">স্টাফদের তালিকা</h2>
+                         <button onClick={() => setIsAddingStaff(true)} className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-accent transition">
+                            <i className="fas fa-user-plus mr-2"></i> নতুন স্টাফ যোগ করুন
+                        </button>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead className="bg-sidebar text-white">
@@ -87,6 +116,14 @@ const StaffManagement: React.FC = () => {
                     </div>
                 </div>
             </div>
+             {isAddingStaff && (
+                <EditStaffModal
+                    staff={defaultStaff}
+                    onClose={() => setIsAddingStaff(false)}
+                    onSave={handleAddStaff}
+                    isAdding={true}
+                />
+            )}
             {editingStaff && (
                 <EditStaffModal
                     staff={editingStaff}

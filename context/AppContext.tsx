@@ -24,7 +24,9 @@ interface AppContextType {
     invigilatorRosters: InvigilatorRoster;
     addStudent: (student: Omit<Student, 'id'>) => void;
     updateStudent: (studentId: string, updatedData: Partial<Student>) => void;
+    addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
     updateTeacher: (teacherId: string, updatedData: Partial<Teacher>) => void;
+    addLibrarian: (librarian: Omit<Librarian, 'id'>) => void;
     updateLibrarian: (librarianId: string, updatedData: Partial<Librarian>) => void;
     addMainExam: (exam: Omit<MainExam, 'id'>) => void;
     deleteMainExam: (id: string) => void;
@@ -91,11 +93,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }));
     };
 
+    const addTeacher = (teacherData: Omit<Teacher, 'id'>) => {
+        const newId = `teacher${Date.now()}`;
+        const newTeacher: Teacher = { id: newId, ...teacherData };
+        setTeachers(prev => ({ ...prev, [newId]: newTeacher }));
+    };
+
     const updateTeacher = (teacherId: string, updatedData: Partial<Teacher>) => {
         setTeachers(prev => ({
             ...prev,
             [teacherId]: { ...prev[teacherId], ...updatedData }
         }));
+    };
+
+    const addLibrarian = (librarianData: Omit<Librarian, 'id'>) => {
+        const newId = `librarian${Date.now()}`;
+        const newLibrarian: Librarian = { id: newId, ...librarianData };
+        setLibrarians(prev => ({ ...prev, [newId]: newLibrarian }));
     };
 
     const updateLibrarian = (librarianId: string, updatedData: Partial<Librarian>) => {
@@ -165,7 +179,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         invigilatorRosters,
         addStudent,
         updateStudent,
+        addTeacher,
         updateTeacher,
+        addLibrarian,
         updateLibrarian,
         addMainExam,
         deleteMainExam,

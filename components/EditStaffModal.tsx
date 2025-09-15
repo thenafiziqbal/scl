@@ -8,9 +8,10 @@ interface EditStaffModalProps {
     staff: StaffData;
     onClose: () => void;
     onSave: (staff: StaffData) => void;
+    isAdding?: boolean;
 }
 
-const EditStaffModal: React.FC<EditStaffModalProps> = ({ staff, onClose, onSave }) => {
+const EditStaffModal: React.FC<EditStaffModalProps> = ({ staff, onClose, onSave, isAdding = false }) => {
     const [formData, setFormData] = useState<StaffData>(staff);
 
     useEffect(() => {
@@ -34,7 +35,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({ staff, onClose, onSave 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4 font-sans">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 transform transition-all animate-scaleIn">
                 <div className="flex justify-between items-center border-b pb-3 mb-5">
-                    <h2 className="text-xl font-bold text-primary">স্টাফের তথ্য এডিট করুন</h2>
+                    <h2 className="text-xl font-bold text-primary">{isAdding ? 'নতুন স্টাফ যোগ করুন' : 'স্টাফের তথ্য এডিট করুন'}</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-danger text-2xl">&times;</button>
                 </div>
                 <form onSubmit={handleSubmit}>
@@ -58,7 +59,11 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({ staff, onClose, onSave 
                             <label className="font-medium text-gray-700">ইমেইল</label>
                             <input type="email" name="email" value={formData.email} onChange={handleChange} required className={fieldClasses}/>
                         </div>
-                        <div className="space-y-1 md:col-span-2">
+                         <div className="space-y-1">
+                            <label className="font-medium text-gray-700">ফোন</label>
+                            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className={fieldClasses}/>
+                        </div>
+                        <div className="space-y-1">
                             <label className="font-medium text-gray-700">প্রোফাইল ছবির URL</label>
                             <input type="url" name="profilePicUrl" value={formData.profilePicUrl || ''} onChange={handleChange} className={fieldClasses}/>
                         </div>
