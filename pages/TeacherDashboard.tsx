@@ -3,15 +3,33 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 
 const TeacherDashboard: React.FC = () => {
-    const { user, schedules } = useApp();
+    const { user, schedules, invigilatorRosters, mainExams, rooms } = useApp();
     const days = ["শনিবার", "রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার"];
     const dayMap = [1, 2, 3, 4, 5, 6, 0]; // JS Day -> App Day (Sat=0, Sun=1) mapping
     const todayIndex = dayMap[new Date().getDay()];
+    const todayDate = new Date();
+    todayDate.setHours(0,0,0,0);
 
     if (!user) return null;
 
     const mySchedules = Object.values(schedules).filter(s => s.teacherId === user.uid);
     const todaysClasses = mySchedules.filter(s => parseInt(s.day, 10) === todayIndex).sort((a, b) => a.startTime.localeCompare(b.startTime));
+    
+    const myDuties = Object.entries(invigilatorRosters)
+        .flatMap(([examId, dates]) => 
+            Object.entries(dates).flatMap(([date, roster]) => 
+                Object.entries(roster)
+                    .filter(([, teacherId]) => teacherId === user.uid)
+                    .map(([roomId]) => ({
+                        examName: mainExams[examId]?.name || 'Unknown Exam',
+                        date: date,
+                        roomName: rooms[roomId]?.name || 'Unknown Room'
+                    }))
+            )
+        )
+        .filter(duty => new Date(duty.date) >= todayDate)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -56,8 +74,19 @@ const TeacherDashboard: React.FC = () => {
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
                  <h2 className="text-xl font-bold text-primary mb-4">আসন্ন ডিউটি</h2>
-                 {/* This section can be implemented if invigilator data is available */}
-                 <p className="text-gray-500">আপনার কোনো আসন্ন ডিউটি নেই।</p>
+                 {myDuties.length > 0 ? (
+                    <div className="space-y-3">
+                        {myDuties.map((duty, index) => (
+                            <div key={index} className="bg-light p-4 rounded-lg border-l-4 border-yellow-500">
+                                <p className="font-bold text-accent">{duty.examName}</p>
+                                <p><strong>তারিখ:</strong> {duty.date}</p>
+                                <p><strong>রুম:</strong> {duty.roomName}</p>
+                            </div>
+                        ))}
+                    </div>
+                 ) : (
+                    <p className="text-gray-500">আপনার কোনো আসন্ন ডিউটি নেই।</p>
+                 )}
             </div>
         </div>
     );

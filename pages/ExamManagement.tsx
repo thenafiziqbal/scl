@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import AdmitCardModal from '../components/AdmitCardModal';
+import { MainExam } from '../types';
 
 const ExamManagement: React.FC = () => {
     const { mainExams, addMainExam, deleteMainExam, rooms, addRoom, deleteRoom, students, classes, teachers, invigilatorRosters, saveInvigilatorRoster } = useApp();
     const [activeTab, setActiveTab] = useState('main-exam');
+    const [admitCardExam, setAdmitCardExam] = useState<MainExam | null>(null);
 
     // State for Main Exam form
     const [mainExamName, setMainExamName] = useState('');
@@ -111,7 +114,8 @@ const ExamManagement: React.FC = () => {
                                 <p className="font-bold">{exam.name}</p>
                                 <p className="text-sm text-gray-500">তারিখ: {exam.date}</p>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-3">
+                                <button onClick={() => setAdmitCardExam(exam)} title="প্রবেশপত্র" className="text-green-600 hover:text-green-800"><i className="fas fa-id-card"></i></button>
                                 <button title="রুটিন তৈরি/এডিট করুন" className="text-accent hover:text-blue-800"><i className="fas fa-calendar-alt"></i></button>
                                 <button onClick={() => deleteMainExam(exam.id)} title="মুছে ফেলুন" className="text-danger hover:text-red-800"><i className="fas fa-trash"></i></button>
                             </div>
@@ -217,6 +221,7 @@ const ExamManagement: React.FC = () => {
     );
     
     return (
+        <>
         <div className="bg-slate-50 p-4 sm:p-6 rounded-xl shadow-lg">
             <div className="border-b border-gray-200">
                 <nav className="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto">
@@ -242,6 +247,13 @@ const ExamManagement: React.FC = () => {
                 {activeTab === 'invigilator-duty' && renderInvigilatorDutyTab()}
             </div>
         </div>
+        {admitCardExam && (
+            <AdmitCardModal
+                exam={admitCardExam}
+                onClose={() => setAdmitCardExam(null)}
+            />
+        )}
+        </>
     );
 };
 

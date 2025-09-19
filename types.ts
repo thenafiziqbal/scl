@@ -163,3 +163,25 @@ export interface InvigilatorRoster {
         };
     };
 }
+
+export interface Notice {
+    id: string;
+    title: string;
+    content: string;
+    date: string; // YYYY-MM-DD
+}
+
+export interface FeeInvoice {
+    id: string;
+    name: string;
+    amount: number;
+    dueDate: string;
+}
+
+export interface StudentPayment {
+    id: string;
+    studentId: string;
+    invoiceId: string;
+    amountPaid: number;
+    paymentDate: string;
+}

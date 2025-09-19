@@ -1,4 +1,4 @@
-import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest, MarksSheet, Class, Section, StudentLeave, Attendance, Subscription, Library, MainExam, Room, InvigilatorRoster } from '../types';
+import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest, MarksSheet, Class, Section, StudentLeave, Attendance, Subscription, Library, MainExam, Room, InvigilatorRoster, Notice, FeeInvoice, StudentPayment } from '../types';
 
 // Single source of truth for all users who can log in.
 export const MOCK_USERS: { [uid: string]: User } = {
@@ -13,7 +13,7 @@ export const MOCK_SCHOOL_SETTINGS: SchoolSettings = {
     schoolName: 'মডার্ন পাবলিক স্কুল',
     schoolLogoUrl: 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png',
     principalName: 'ডঃ মোঃ আবুল কালাম',
-    principalSignatureUrl: 'https://via.placeholder.com/150x50.png?text=Signature',
+    principalSignatureUrl: 'https://i.ibb.co/7C1mHk8/signature-placeholder.png',
     premiumFeatures: {
         examManagement: true,
     }
@@ -72,7 +72,9 @@ export const MOCK_ATTENDANCE: Attendance = {
     [today]: {
         'ষষ্ঠ শ্রেণী___ক শাখা': {
             'std1': { status: 'present' },
-            'std2': { status: 'absent' }
+            'std2': { status: 'absent' },
+            'std4': { status: 'present' },
+            'std5': { status: 'present' },
         },
         'সপ্তম শ্রেণী___খ শাখা': {
             'std3': { status: 'present' }
@@ -119,6 +121,28 @@ export const MOCK_INVIGILATOR_ROSTERS: InvigilatorRoster = {
         '2024-08-01': {
             'room1': 'teacher1',
             'room2': 'teacher2',
+        },
+         '2024-12-15': { // A future date for testing
+            'room1': 'teacher1'
         }
     }
+};
+
+export const MOCK_NOTICES: { [id: string]: Notice } = {
+    'notice1': { id: 'notice1', title: 'বার্ষিক ক্রীড়া প্রতিযোগিতা', content: 'আগামী শুক্রবার, ২০শে আগস্ট, ২০২৪ তারিখে স্কুলের বার্ষিক ক্রীড়া প্রতিযোগিতা অনুষ্ঠিত হবে। সকল ছাত্রছাত্রীকে মাঠে উপস্থিত থাকার জন্য অনুরোধ করা হচ্ছে।', date: '2024-08-15' },
+    'notice2': { id: 'notice2', title: 'অর্ধবার্ষিকী পরীক্ষার ফলাফল', content: 'অর্ধবার্ষিকী পরীক্ষার ফলাফল আগামী সপ্তাহে প্রকাশ করা হবে। শিক্ষার্থীরা স্কুল ওয়েবসাইট থেকে তাদের ফলাফল দেখতে পারবে।', date: '2024-08-12' },
+    'notice3': { id: 'notice3', title: 'অভিভাবক সভা', content: 'সকল শ্রেণীর ছাত্রছাত্রীদের অভিভাবকদের নিয়ে একটি সভা আগামী ২৫শে আগস্ট, ২০২৪ তারিখে সকাল ১০টায় স্কুল অডিটোরিয়ামে অনুষ্ঠিত হবে।', date: '2024-08-10' },
+};
+
+
+export const MOCK_FEE_INVOICES: { [id: string]: FeeInvoice } = {
+    'inv1': { id: 'inv1', name: 'মাসিক বেতন - জুলাই', amount: 1200, dueDate: '2024-07-10' },
+    'inv2': { id: 'inv2', name: 'অর্ধবার্ষিকী পরীক্ষার ফি', amount: 800, dueDate: '2024-07-20' },
+    'inv3': { id: 'inv3', name: 'মাসিক বেতন - আগস্ট', amount: 1200, dueDate: '2024-08-10' },
+};
+
+export const MOCK_STUDENT_PAYMENTS: { [id: string]: StudentPayment } = {
+    'payment1': { id: 'payment1', studentId: 'std1', invoiceId: 'inv1', amountPaid: 1200, paymentDate: '2024-07-08' },
+    'payment2': { id: 'payment2', studentId: 'std1', invoiceId: 'inv2', amountPaid: 800, paymentDate: '2024-07-15' },
+    'payment3': { id: 'payment3', studentId: 'std2', invoiceId: 'inv1', amountPaid: 1200, paymentDate: '2024-07-10' },
 };

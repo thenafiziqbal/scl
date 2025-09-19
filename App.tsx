@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
@@ -19,6 +18,8 @@ import Subscription from './pages/Subscription';
 import Settings from './pages/Settings';
 import StudentProfile from './pages/StudentProfile';
 import ProtectedRoute from './components/ProtectedRoute';
+import NoticeBoard from './pages/NoticeBoard';
+import FeesManagement from './pages/FeesManagement';
 
 const AppRoutes: React.FC = () => {
     const { user } = useApp();
@@ -41,6 +42,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/exam-management" element={<ProtectedRoute roles={['admin']} isPremium><ExamManagement /></ProtectedRoute>} />
                 <Route path="/subscription" element={<ProtectedRoute roles={['admin']}><Subscription /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute roles={['admin']}><Settings /></ProtectedRoute>} />
+                <Route path="/fees-management" element={<ProtectedRoute roles={['admin']}><FeesManagement /></ProtectedRoute>} />
 
                 {/* Teacher Routes */}
                 <Route path="/teacher-dashboard" element={<ProtectedRoute roles={['teacher']}><TeacherDashboard /></ProtectedRoute>} />
@@ -55,6 +57,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/student-profile/:id" element={<ProtectedRoute roles={['admin', 'teacher']}><StudentProfile /></ProtectedRoute>} />
                 <Route path="/schedules" element={<ProtectedRoute roles={['admin', 'teacher']}><Schedules /></ProtectedRoute>} />
                 <Route path="/student-leaves" element={<ProtectedRoute roles={['admin']}><StudentLeaves /></ProtectedRoute>} />
+                <Route path="/notice-board" element={<ProtectedRoute roles={['admin', 'teacher', 'librarian']}><NoticeBoard /></ProtectedRoute>} />
             </Routes>
         </MainLayout>
     );

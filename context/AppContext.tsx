@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest, MarksSheet, Class, Section, StudentLeave, Attendance, Subscription, Library, MainExam, Room, InvigilatorRoster } from '../types';
-import { MOCK_USERS, MOCK_SCHOOL_SETTINGS, MOCK_STUDENTS, MOCK_TEACHERS, MOCK_LIBRARIANS, MOCK_SCHEDULES, MOCK_CLASS_TESTS, MOCK_MARKS, MOCK_CLASSES, MOCK_SECTIONS, MOCK_LEAVES, MOCK_ATTENDANCE, MOCK_SUBSCRIPTION, MOCK_LIBRARY, MOCK_MAIN_EXAMS, MOCK_ROOMS, MOCK_INVIGILATOR_ROSTERS } from '../services/mockData';
+import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest, MarksSheet, Class, Section, StudentLeave, Attendance, Subscription, Library, MainExam, Room, InvigilatorRoster, Notice, DailyAttendance, FeeInvoice, StudentPayment } from '../types';
+import { MOCK_USERS, MOCK_SCHOOL_SETTINGS, MOCK_STUDENTS, MOCK_TEACHERS, MOCK_LIBRARIANS, MOCK_SCHEDULES, MOCK_CLASS_TESTS, MOCK_MARKS, MOCK_CLASSES, MOCK_SECTIONS, MOCK_LEAVES, MOCK_ATTENDANCE, MOCK_SUBSCRIPTION, MOCK_LIBRARY, MOCK_MAIN_EXAMS, MOCK_ROOMS, MOCK_INVIGILATOR_ROSTERS, MOCK_NOTICES, MOCK_FEE_INVOICES, MOCK_STUDENT_PAYMENTS } from '../services/mockData';
 
 interface AppContextType {
     user: User | null;
@@ -22,6 +22,9 @@ interface AppContextType {
     mainExams: { [id: string]: MainExam };
     rooms: { [id: string]: Room };
     invigilatorRosters: InvigilatorRoster;
+    notices: { [id: string]: Notice };
+    feeInvoices: { [id: string]: FeeInvoice };
+    studentPayments: { [id: string]: StudentPayment };
     addStudent: (student: Omit<Student, 'id'>) => void;
     updateStudent: (studentId: string, updatedData: Partial<Student>) => void;
     addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
@@ -33,6 +36,15 @@ interface AppContextType {
     addRoom: (room: Omit<Room, 'id'>) => void;
     deleteRoom: (id: string) => void;
     saveInvigilatorRoster: (examId: string, date: string, roster: { [roomId: string]: string }) => void;
+    addSchedule: (schedule: Omit<Schedule, 'id'>) => void;
+    deleteSchedule: (id: string) => void;
+    addNotice: (notice: Omit<Notice, 'id'>) => void;
+    deleteNotice: (id: string) => void;
+    saveAttendance: (date: string, classSection: string, dailyAttendance: DailyAttendance) => void;
+    addFeeInvoice: (invoice: Omit<FeeInvoice, 'id'>) => void;
+    updateFeeInvoice: (invoiceId: string, updatedData: Partial<FeeInvoice>) => void;
+    deleteFeeInvoice: (id: string) => void;
+    recordStudentPayment: (payment: Omit<StudentPayment, 'id'>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,6 +67,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [mainExams, setMainExams] = useState<{ [id: string]: MainExam }>(MOCK_MAIN_EXAMS);
     const [rooms, setRooms] = useState<{ [id: string]: Room }>(MOCK_ROOMS);
     const [invigilatorRosters, setInvigilatorRosters] = useState<InvigilatorRoster>(MOCK_INVIGILATOR_ROSTERS);
+    const [notices, setNotices] = useState<{ [id: string]: Notice }>(MOCK_NOTICES);
+    const [feeInvoices, setFeeInvoices] = useState<{ [id: string]: FeeInvoice }>(MOCK_FEE_INVOICES);
+    const [studentPayments, setStudentPayments] = useState<{ [id: string]: StudentPayment }>(MOCK_STUDENT_PAYMENTS);
 
     const login = (email: string, password: string): boolean => {
         const foundUser = Object.values(MOCK_USERS).find(u => u.email === email && u.password === password);
@@ -157,6 +172,75 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }));
     };
 
+    const addSchedule = (scheduleData: Omit<Schedule, 'id'>) => {
+        const newId = `sch${Date.now()}`;
+        const newSchedule: Schedule = { id: newId, ...scheduleData };
+        setSchedules(prev => ({ ...prev, [newId]: newSchedule }));
+    };
+
+    const deleteSchedule = (id: string) => {
+        setSchedules(prev => {
+            const newState = { ...prev };
+            delete newState[id];
+            return newState;
+        });
+    };
+    
+    const addNotice = (noticeData: Omit<Notice, 'id'>) => {
+        const newId = `notice${Date.now()}`;
+        const newNotice: Notice = { id: newId, ...noticeData };
+        setNotices(prev => ({ ...prev, [newId]: newNotice }));
+    };
+
+    const deleteNotice = (id: string) => {
+        setNotices(prev => {
+            const newState = { ...prev };
+            delete newState[id];
+            return newState;
+        });
+    };
+
+    const saveAttendance = (date: string, classSection: string, dailyAttendance: DailyAttendance) => {
+        setAttendance(prev => ({
+            ...prev,
+            [date]: {
+                ...prev[date],
+                [classSection]: dailyAttendance
+            }
+        }));
+    };
+    
+    const addFeeInvoice = (invoiceData: Omit<FeeInvoice, 'id'>) => {
+        const newId = `inv${Date.now()}`;
+        const newInvoice: FeeInvoice = { id: newId, ...invoiceData };
+        setFeeInvoices(prev => ({ ...prev, [newId]: newInvoice }));
+    };
+
+    const updateFeeInvoice = (invoiceId: string, updatedData: Partial<FeeInvoice>) => {
+        setFeeInvoices(prev => ({
+            ...prev,
+            [invoiceId]: { ...prev[invoiceId], ...updatedData }
+        }));
+    };
+    
+    const deleteFeeInvoice = (id: string) => {
+        if (Object.values(studentPayments).some(p => p.invoiceId === id)) {
+            alert('এই ইনভয়েসের বিপরীতে পেমেন্ট থাকায় এটি মুছে ফেলা যাবে না।');
+            return;
+        }
+        setFeeInvoices(prev => {
+            const newState = { ...prev };
+            delete newState[id];
+            return newState;
+        });
+    };
+
+    const recordStudentPayment = (paymentData: Omit<StudentPayment, 'id'>) => {
+        const newId = `payment${Date.now()}`;
+        const newPayment: StudentPayment = { id: newId, ...paymentData };
+        setStudentPayments(prev => ({ ...prev, [newId]: newPayment }));
+    };
+
     const value = {
         user,
         login,
@@ -177,6 +261,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         mainExams,
         rooms,
         invigilatorRosters,
+        notices,
+        feeInvoices,
+        studentPayments,
         addStudent,
         updateStudent,
         addTeacher,
@@ -188,6 +275,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addRoom,
         deleteRoom,
         saveInvigilatorRoster,
+        addSchedule,
+        deleteSchedule,
+        addNotice,
+        deleteNotice,
+        saveAttendance,
+        addFeeInvoice,
+        updateFeeInvoice,
+        deleteFeeInvoice,
+        recordStudentPayment,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

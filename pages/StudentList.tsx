@@ -1,13 +1,16 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Student } from '../types';
 import EditStudentModal from '../components/EditStudentModal';
+import IDCardModal from '../components/IDCardModal';
 
 const StudentList: React.FC = () => {
-    const { students, user, classes, sections, updateStudent } = useApp();
+    const { students, user, classes, sections, updateStudent, settings } = useApp();
     const navigate = useNavigate();
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+    const [idCardStudent, setIdCardStudent] = useState<Student | null>(null);
 
 
     const sortedStudents = Object.values(students).sort((a, b) => {
@@ -54,17 +57,19 @@ const StudentList: React.FC = () => {
                                     <td className="p-4 text-gray-700">{student.className} ({student.section})</td>
                                     <td className="p-4 text-gray-700">{student.roll}</td>
                                     <td className="p-4">
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-3">
                                             <button 
                                                 onClick={() => navigate(`/student-profile/${student.id}`)}
                                                 className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition"
+                                                title="প্রোফাইল দেখুন"
                                             >
                                                 প্রোফাইল
                                             </button>
+                                            <button onClick={() => setIdCardStudent(student)} className="text-green-600 text-xl hover:text-green-800" title="আইডি কার্ড"><i className="fas fa-id-card"></i></button>
                                             {user?.role === 'admin' && (
                                                 <>
-                                                    <button onClick={() => setEditingStudent(student)} className="text-accent text-xl hover:text-blue-800"><i className="fas fa-edit"></i></button>
-                                                    <button className="text-danger text-xl hover:text-red-800"><i className="fas fa-trash"></i></button>
+                                                    <button onClick={() => setEditingStudent(student)} className="text-accent text-xl hover:text-blue-800" title="এডিট করুন"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-danger text-xl hover:text-red-800" title="মুছে ফেলুন"><i className="fas fa-trash"></i></button>
                                                 </>
                                             )}
                                         </div>
@@ -82,6 +87,13 @@ const StudentList: React.FC = () => {
                     sections={sections}
                     onClose={() => setEditingStudent(null)}
                     onSave={handleSave}
+                />
+            )}
+            {idCardStudent && (
+                 <IDCardModal
+                    student={idCardStudent}
+                    settings={settings}
+                    onClose={() => setIdCardStudent(null)}
                 />
             )}
         </>

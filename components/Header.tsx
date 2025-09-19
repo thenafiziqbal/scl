@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -16,8 +15,10 @@ const pageTitles: { [key: string]: string } = {
     '/teacher-attendance': 'ছাত্রের হাজিরা',
     '/class-tests': 'ক্লাস টেস্ট ও নম্বর',
     '/exam-management': 'পরীক্ষা ম্যানেজমেন্ট',
+    '/fees-management': 'ফি ম্যানেজমেন্ট',
     '/library-management': 'লাইব্রেরি ম্যানেজমেন্ট',
     '/student-leaves': 'ছাত্রের ছুটি',
+    '/notice-board': 'নোটিশ বোর্ড',
     '/subscription': 'সাবস্ক্রিপশন ও পেমেন্ট',
     '/settings': 'সেটিংস',
 };

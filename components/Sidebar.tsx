@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -19,10 +18,12 @@ const navItems: NavItem[] = [
     { path: '/teachers', icon: 'fas fa-chalkboard-user', label: 'স্টাফ ম্যানেজমেন্ট', roles: ['admin'] },
     { path: '/schedules', icon: 'fas fa-calendar-alt', label: 'ক্লাস শিডিউল', roles: ['admin', 'teacher'] },
     { path: '/teacher-attendance', icon: 'fas fa-user-check', label: 'ছাত্রের হাজিরা', roles: ['teacher'] },
+    { path: '/fees-management', icon: 'fas fa-file-invoice-dollar', label: 'ফি ম্যানেজমেন্ট', roles: ['admin'] },
     { path: '/class-tests', icon: 'fas fa-file-signature', label: 'ক্লাস টেস্ট ও নম্বর', roles: ['teacher'] },
     { path: '/exam-management', icon: 'fas fa-sitemap', label: 'পরীক্ষা ম্যানেজমেন্ট', roles: ['admin'], isPremium: true },
     { path: '/library-management', icon: 'fas fa-book-open-reader', label: 'লাইব্রেরি ম্যানেজমেন্ট', roles: ['admin', 'librarian'] },
     { path: '/student-leaves', icon: 'fas fa-user-clock', label: 'ছাত্রের ছুটি', roles: ['admin'] },
+    { path: '/notice-board', icon: 'fas fa-bullhorn', label: 'নোটিশ বোর্ড', roles: ['admin', 'teacher', 'librarian'] },
     { path: '/subscription', icon: 'fas fa-star', label: 'সাবস্ক্রিপশন', roles: ['admin'] },
     { path: '/settings', icon: 'fas fa-cogs', label: 'সেটিংস', roles: ['admin'] },
 ];
@@ -80,4 +81,3 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 };
 
 export default Sidebar;
-
