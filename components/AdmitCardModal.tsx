@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { MainExam } from '../types';
+import { MainExam, Student, Class, Section } from '../types';
+
+declare const html2canvas: any;
 
 interface AdmitCardModalProps {
     exam: MainExam;
@@ -13,13 +15,34 @@ const AdmitCardModal: React.FC<AdmitCardModalProps> = ({ exam, onClose }) => {
     const [selectedSection, setSelectedSection] = useState(Object.values(sections)[0]?.name || '');
 
     const studentsInClass = useMemo(() => {
+        // FIX: Add explicit types to resolve property access and sort errors.
         return Object.values(students)
-            .filter(s => s.className === selectedClass && s.section === selectedSection)
-            .sort((a, b) => a.roll - b.roll);
+            .filter((s: Student) => s.className === selectedClass && s.section === selectedSection)
+            .sort((a: Student, b: Student) => a.roll - b.roll);
     }, [students, selectedClass, selectedSection]);
 
     const handlePrint = () => {
         window.print();
+    };
+
+    const handlePngDownload = () => {
+        const printArea = document.getElementById('admit-card-print-area');
+        if (printArea) {
+            html2canvas(printArea, { 
+                useCORS: true,
+                scale: 2 // Improve image quality
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `Admit_Cards_${selectedClass}_${selectedSection}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(err => {
+                console.error("PNG ডাউনলোড করতে সমস্যা হয়েছে:", err);
+                alert("দুঃখিত, ছবিটি ডাউনলোড করা যায়নি।");
+            });
+        }
     };
 
     return (
@@ -32,26 +55,31 @@ const AdmitCardModal: React.FC<AdmitCardModalProps> = ({ exam, onClose }) => {
 
                 <div className="print-controls bg-light p-4 rounded-lg mb-4 flex flex-wrap gap-4 items-end">
                     <div>
-                        <label className="font-medium text-sm">ক্লাস</label>
-                        <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="w-full p-2 border rounded-md bg-white mt-1">
-                            {Object.values(classes).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                        <label className="font-medium text-sm text-gray-700">ক্লাস</label>
+                        <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="w-full p-2 border rounded-md bg-white mt-1 text-gray-900">
+                            {/* FIX: Add explicit type for `c` to resolve property access errors. */}
+                            {Object.values(classes).map((c: Class) => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>
                     </div>
                      <div>
-                        <label className="font-medium text-sm">বিভাগ</label>
-                        <select value={selectedSection} onChange={e => setSelectedSection(e.target.value)} className="w-full p-2 border rounded-md bg-white mt-1">
-                            {Object.values(sections).map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                        <label className="font-medium text-sm text-gray-700">বিভাগ</label>
+                        <select value={selectedSection} onChange={e => setSelectedSection(e.target.value)} className="w-full p-2 border rounded-md bg-white mt-1 text-gray-900">
+                            {/* FIX: Add explicit type for `s` to resolve property access errors. */}
+                            {Object.values(sections).map((s: Section) => <option key={s.id} value={s.name}>{s.name}</option>)}
                         </select>
                     </div>
                     <button onClick={handlePrint} className="bg-secondary text-white font-bold py-2 px-5 rounded-lg hover:bg-accent transition flex items-center gap-2">
                         <i className="fas fa-print"></i> প্রিন্ট করুন
+                    </button>
+                    <button onClick={handlePngDownload} className="bg-green-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                        <i className="fas fa-file-image"></i> PNG ডাউনলোড
                     </button>
                 </div>
 
                 {/* Print Area */}
                 <div id="admit-card-print-area" className="max-h-[60vh] overflow-y-auto bg-gray-200 p-4 rounded">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {studentsInClass.map(student => (
+                        {studentsInClass.map((student: Student) => (
                             <div key={student.id} className="admit-card w-full h-auto bg-white flex flex-col p-3 border-2 border-dashed border-gray-400 rounded-lg">
                                 {/* Header */}
                                 <div className="flex items-center space-x-2 border-b-2 border-primary pb-2 text-center">

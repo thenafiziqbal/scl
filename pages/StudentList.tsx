@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -13,7 +12,8 @@ const StudentList: React.FC = () => {
     const [idCardStudent, setIdCardStudent] = useState<Student | null>(null);
 
 
-    const sortedStudents = Object.values(students).sort((a, b) => {
+    // FIX: Add explicit types for sort parameters to ensure correct type inference.
+    const sortedStudents = Object.values(students).sort((a: Student, b: Student) => {
         if (a.className < b.className) return -1;
         if (a.className > b.className) return 1;
         return a.roll - b.roll;
@@ -43,7 +43,7 @@ const StudentList: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedStudents.map(student => (
+                            {sortedStudents.map((student: Student) => (
                                 <tr key={student.id} className="border-b">
                                     <td className="p-4">
                                         <img 
@@ -65,11 +65,11 @@ const StudentList: React.FC = () => {
                                             >
                                                 প্রোফাইল
                                             </button>
-                                            <button onClick={() => setIdCardStudent(student)} className="text-green-600 text-xl hover:text-green-800" title="আইডি কার্ড"><i className="fas fa-id-card"></i></button>
+                                            <button onClick={() => setIdCardStudent(student)} className="text-sky-600 text-xl hover:text-sky-800" title="আইডি কার্ড"><i className="fas fa-id-card"></i></button>
                                             {user?.role === 'admin' && (
                                                 <>
-                                                    <button onClick={() => setEditingStudent(student)} className="text-accent text-xl hover:text-blue-800" title="এডিট করুন"><i className="fas fa-edit"></i></button>
-                                                    <button className="text-danger text-xl hover:text-red-800" title="মুছে ফেলুন"><i className="fas fa-trash"></i></button>
+                                                    <button onClick={() => setEditingStudent(student)} className="text-amber-600 text-xl hover:text-amber-800" title="এডিট করুন"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-danger text-xl hover:text-red-700" title="মুছে ফেলুন"><i className="fas fa-trash"></i></button>
                                                 </>
                                             )}
                                         </div>

@@ -1,148 +1,129 @@
-import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest, MarksSheet, Class, Section, StudentLeave, Attendance, Subscription, Library, MainExam, Room, InvigilatorRoster, Notice, FeeInvoice, StudentPayment } from '../types';
+import { User, Student, Teacher, Librarian, DepartmentHead, Class, Section, Schedule, Attendance, ClassTest, Marks, MainExam, ExamRoutine, Room, SeatPlan, InvigilatorRoster, Library, StudentLeave, Notice, FeeInvoice, StudentPayment, Subscription, SchoolSettings, UserRole } from '../types';
 
-// Single source of truth for all users who can log in.
-export const MOCK_USERS: { [uid: string]: User } = {
-    'admin1': { uid: 'admin1', email: 'admin@school.com', name: 'অধ্যক্ষ', role: 'admin', password: 'password' },
-    'teacher1': { uid: 'teacher1', email: 'teacher@school.com', name: 'মোঃ রফিক হাসান', role: 'teacher', subject: 'গণিত', password: 'password' },
-    'teacher2': { uid: 'teacher2', email: 'teacher2@school.com', name: 'শাহনাজ পারভীন', role: 'teacher', subject: 'বাংলা', password: 'password' },
-    'librarian1': { uid: 'librarian1', email: 'librarian@school.com', name: 'সেলিনা আক্তার', role: 'librarian', password: 'password' }
+type TeacherWithUser = Teacher & { uid: string; role: UserRole; password?: string; };
+type LibrarianWithUser = Librarian & { uid: string; role: UserRole; password?: string; };
+type DepartmentHeadWithUser = DepartmentHead & { uid: string; role: UserRole; password?: string; };
+
+
+export const mockUsers: { [uid: string]: User & {department?: string} } = {
+    'user1': { uid: 'user1', name: 'অ্যাডমিন', email: 'admin@school.com', role: 'admin', password: 'password' },
+    'user2': { uid: 'user2', name: 'মোঃ রফিক', email: 'teacher@school.com', role: 'teacher', password: 'password' },
+    'user3': { uid: 'user3', name: 'শাহানা বেগম', email: 'librarian@school.com', role: 'librarian', password: 'password' },
+    'user4': { uid: 'user4', name: 'ডঃ আনোয়ার হোসেন', email: 'head@school.com', role: 'department-head', password: 'password', department: 'বিজ্ঞান বিভাগ'},
+    'user5': { uid: 'user5', name: 'Super Admin', email: 'super@admin.com', role: 'super-admin', password: 'password' },
+    'user6': { uid: 'user6', name: 'আরিফুল ইসলাম', email: 'teacher2@school.com', role: 'teacher', password: 'password'},
 };
 
+export const mockStudents: { [id: string]: Student } = {
+    'stu1': { id: 'stu1', name: 'আকাশ আহমেদ', roll: 1, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'নুর আহমেদ', contact: '01712345678', guardianEmail: 'guardian1@email.com', profilePicUrl: 'https://i.pravatar.cc/150?u=stu1' },
+    'stu2': { id: 'stu2', name: 'বাতাসি খাতুন', roll: 2, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'আলী খাতুন', contact: '01812345678', guardianEmail: 'guardian2@email.com', profilePicUrl: 'https://i.pravatar.cc/150?u=stu2' },
+    'stu3': { id: 'stu3', name: 'মেঘলা চৌধুরী', roll: 1, className: 'নবম শ্রেণী', section: 'খ', guardianName: 'রহমান চৌধুরী', contact: '01912345678', profilePicUrl: 'https://i.pravatar.cc/150?u=stu3' },
+    'stu4': { id: 'stu4', name: 'সাগর ইসলাম', roll: 3, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'শফিক ইসলাম', contact: '01612345678', profilePicUrl: 'https://i.pravatar.cc/150?u=stu4' },
+};
 
-export const MOCK_SCHOOL_SETTINGS: SchoolSettings = {
-    schoolName: 'মডার্ন পাবলিক স্কুল',
+export const mockTeachers: { [id: string]: TeacherWithUser } = {
+    'tech1': { id: 'tech1', uid: 'user2', role: 'teacher', name: 'মোঃ রফিক', subject: 'গণিত', phone: '01777777777', email: 'teacher@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=tech1', department: 'বিজ্ঞান বিভাগ' },
+    'tech2': { id: 'tech2', uid: 'user6', role: 'teacher', name: 'আরিফুল ইসলাম', subject: 'বাংলা', phone: '01888888888', email: 'teacher2@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=tech2', department: 'কলা বিভাগ' },
+};
+
+export const mockLibrarians: { [id: string]: LibrarianWithUser } = {
+    'lib1': { id: 'lib1', uid: 'user3', role: 'librarian', name: 'শাহানা বেগম', phone: '01999999999', email: 'librarian@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=lib1' },
+};
+
+export const mockDepartmentHeads: { [id: string]: DepartmentHeadWithUser } = {
+    'head1': { id: 'head1', uid: 'user4', role: 'department-head', name: 'ডঃ আনোয়ার হোসেন', department: 'বিজ্ঞান বিভাগ', phone: '01555555555', email: 'head@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=head1' },
+};
+
+export const mockClasses: { [id: string]: Class } = {
+    'cls1': { id: 'cls1', name: 'নবম শ্রেণী' },
+    'cls2': { id: 'cls2', name: 'দশম শ্রেণী' },
+};
+
+export const mockSections: { [id: string]: Section } = {
+    'sec1': { id: 'sec1', name: 'ক' },
+    'sec2': { id: 'sec2', name: 'খ' },
+};
+
+export const mockSchedules: { [id: string]: Schedule } = {
+    'sch1': { id: 'sch1', day: '1', startTime: '10:00', endTime: '11:00', className: 'দশম শ্রেণী', section: 'ক', subject: 'গণিত', teacherId: 'tech1' },
+    'sch2': { id: 'sch2', day: '2', startTime: '11:00', endTime: '12:00', className: 'নবম শ্রেণী', section: 'খ', subject: 'বাংলা', teacherId: 'tech2' },
+};
+
+export const mockAttendance: Attendance = {
+    [new Date().toISOString().slice(0, 10)]: {
+        'দশম শ্রেণী___ক': {
+            'stu1': { status: 'present' },
+            'stu2': { status: 'absent' },
+            'stu4': { status: 'present' },
+        }
+    }
+};
+
+export const mockClassTests: { [id: string]: ClassTest } = {
+    'ct1': { id: 'ct1', examName: 'গণিত প্রথম কুইজ', className: 'দশম শ্রেণী', section: 'ক', subject: 'গণিত', totalMarks: 20, createdBy: 'user2' },
+};
+
+export const mockMarks: Marks = {
+    'ct1': {
+        'stu1': { marksObtained: 18, totalMarks: 20 },
+        'stu2': { marksObtained: 15, totalMarks: 20 },
+    }
+};
+
+export const mockMainExams: { [id: string]: MainExam } = {
+    'exam1': { id: 'exam1', name: 'বার্ষিক পরীক্ষা', startDate: '2024-12-10', endDate: '2024-12-25' },
+};
+
+export const mockExamRoutines: { [id: string]: ExamRoutine } = {
+    'er1': { id: 'er1', examId: 'exam1', date: '2024-12-12', day: 'বৃহস্পতিবার', subject: 'বাংলা ১ম পত্র', startTime: '10:00', endTime: '13:00', className: 'সকল' },
+};
+
+export const mockRooms: { [id: string]: Room } = {
+    'room1': { id: 'room1', name: '১০১', capacity: 30 },
+    'room2': { id: 'room2', name: '১০২', capacity: 30 },
+};
+
+export const mockSeatPlans: SeatPlan = {};
+export const mockInvigilatorRosters: InvigilatorRoster = {};
+
+export const mockLibrary: Library = {
+    books: {
+        'book1': { id: 'book1', title: 'হাজার বছর ধরে', author: 'জহির রায়হান', totalQuantity: 5, availableQuantity: 3 },
+        'book2': { id: 'book2', title: 'আমার বন্ধু রাশেদ', author: 'মুহম্মদ জাফর ইকবাল', totalQuantity: 3, availableQuantity: 3 },
+    },
+    issuedBooks: {
+        'issue1': { id: 'issue1', bookId: 'book1', studentId: 'stu1', issueDate: '2024-07-01', dueDate: '2024-07-15', status: 'issued' },
+    }
+};
+
+export const mockLeaves: { [id: string]: StudentLeave } = {
+    'leave1': { id: 'leave1', studentId: 'stu3', reason: 'অসুস্থতা', startDate: '2024-07-20', endDate: '2024-07-22', status: 'approved' },
+};
+
+export const mockNotices: { [id: string]: Notice } = {
+    'notice1': { id: 'notice1', title: 'স্কুল বন্ধের নোটিশ', content: 'ঈদের ছুটির জন্য স্কুল আগামী সপ্তাহ বন্ধ থাকবে।', date: '2024-07-15' },
+};
+
+export const mockFeeInvoices: { [id: string]: FeeInvoice } = {
+    'inv1': { id: 'inv1', name: 'মাসিক বেতন (জুলাই)', amount: 1200, dueDate: '2024-07-10' },
+};
+
+export const mockStudentPayments: { [id: string]: StudentPayment } = {
+    'pay1': { id: 'pay1', studentId: 'stu1', invoiceId: 'inv1', amountPaid: 1200, paymentDate: '2024-07-05' },
+};
+
+export const mockSubscription: Subscription = {
+    tier: 'প্রিমিয়াম',
+    status: 'Active',
+    endDate: '2025-12-31'
+};
+
+export const mockSettings: SchoolSettings = {
+    schoolName: 'আমার আদর্শ স্কুল',
     schoolLogoUrl: 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png',
-    principalName: 'ডঃ মোঃ আবুল কালাম',
-    principalSignatureUrl: 'https://i.ibb.co/7C1mHk8/signature-placeholder.png',
+    principalName: 'মোঃ আব্দুল্লাহ',
+    principalSignatureUrl: 'https://i.ibb.co/7zJ2S5b/signature-placeholder.png',
     premiumFeatures: {
         examManagement: true,
     }
-};
-
-export const MOCK_CLASSES: { [id: string]: Class } = {
-    'c1': { id: 'c1', name: 'ষষ্ঠ শ্রেণী' },
-    'c2': { id: 'c2', name: 'সপ্তম শ্রেণী' },
-    'c3': { id: 'c3', name: 'অষ্টম শ্রেণী' },
-};
-
-export const MOCK_SECTIONS: { [id: string]: Section } = {
-    's1': { id: 's1', name: 'ক শাখা' },
-    's2': { id: 's2', name: 'খ শাখা' },
-};
-
-export const MOCK_STUDENTS: { [id: string]: Student } = {
-    'std1': { id: 'std1', name: 'আরিফ হোসেন', roll: 1, className: 'ষষ্ঠ শ্রেণী', section: 'ক শাখা', guardianName: 'মোঃ শফিক', contact: '01712345678', profilePicUrl: 'https://picsum.photos/seed/std1/200' },
-    'std2': { id: 'std2', name: 'ফারিয়া সুলতানা', roll: 2, className: 'ষষ্ঠ শ্রেণী', section: 'ক শাখা', guardianName: 'আহমেদ সুলতান', contact: '01812345678', profilePicUrl: 'https://picsum.photos/seed/std2/200' },
-    'std3': { id: 'std3', name: 'ইমরান খান', roll: 1, className: 'সপ্তম শ্রেণী', section: 'খ শাখা', guardianName: 'নাসির খান', contact: '01912345678', profilePicUrl: 'https://picsum.photos/seed/std3/200' },
-    'std4': { id: 'std4', name: 'তাসনিয়া রহমান', roll: 3, className: 'ষষ্ঠ শ্রেণী', section: 'ক শাখা', guardianName: 'ওসমান গণি', contact: '01612345678', profilePicUrl: 'https://picsum.photos/seed/std4/200' },
-    'std5': { id: 'std5', name: 'সাকিব আল হাসান', roll: 4, className: 'ষষ্ঠ শ্রেণী', section: 'ক শাখা', guardianName: 'মাশরাফি বিন মর্তুজা', contact: '01512345678', profilePicUrl: 'https://picsum.photos/seed/std5/200' },
-};
-
-export const MOCK_TEACHERS: { [id: string]: Teacher } = {
-    'teacher1': { id: 'teacher1', name: 'মোঃ রফিক হাসান', subject: 'গণিত', phone: '01711111111', email: 'teacher@school.com', profilePicUrl: 'https://picsum.photos/seed/teacher1/200' },
-    'teacher2': { id: 'teacher2', name: 'শাহনাজ পারভীন', subject: 'বাংলা', phone: '01822222222', email: 'teacher2@school.com', profilePicUrl: 'https://picsum.photos/seed/teacher2/200' },
-};
-
-export const MOCK_LIBRARIANS: { [id: string]: Librarian } = {
-    'librarian1': { id: 'librarian1', name: 'সেলিনা আক্তার', phone: '01933333333', email: 'librarian@school.com', profilePicUrl: 'https://picsum.photos/seed/librarian1/200' },
-};
-
-export const MOCK_SCHEDULES: { [id: string]: Schedule } = {
-    'sch1': { id: 'sch1', day: '1', className: 'ষষ্ঠ শ্রেণী', section: 'ক শাখা', subject: 'গণিত', teacherId: 'teacher1', startTime: '09:00', endTime: '10:00' },
-    'sch2': { id: 'sch2', day: '2', className: 'সপ্তম শ্রেণী', section: 'খ শাখা', subject: 'বাংলা', teacherId: 'teacher2', startTime: '10:00', endTime: '11:00' },
-};
-
-export const MOCK_CLASS_TESTS: { [id: string]: ClassTest } = {
-    'ct1': { id: 'ct1', examName: 'মাসিক পরীক্ষা - ১', className: 'ষষ্ঠ শ্রেণী', section: 'ক শাখা', subject: 'গণিত', totalMarks: 20, createdBy: 'teacher1' },
-};
-
-export const MOCK_MARKS: MarksSheet = {
-    'ct1': {
-        'std1': { marksObtained: 18 },
-        'std2': { marksObtained: 15 }
-    }
-};
-
-export const MOCK_LEAVES: { [id: string]: StudentLeave } = {
-    'leave1': { id: 'leave1', studentId: 'std2', reason: 'অসুস্থতা', startDate: '2024-07-20', endDate: '2024-07-22' }
-};
-
-const today = new Date().toISOString().slice(0, 10);
-export const MOCK_ATTENDANCE: Attendance = {
-    [today]: {
-        'ষষ্ঠ শ্রেণী___ক শাখা': {
-            'std1': { status: 'present' },
-            'std2': { status: 'absent' },
-            'std4': { status: 'present' },
-            'std5': { status: 'present' },
-        },
-        'সপ্তম শ্রেণী___খ শাখা': {
-            'std3': { status: 'present' }
-        }
-    }
-};
-
-export const MOCK_SUBSCRIPTION: Subscription = {
-    status: 'Active',
-    tier: 'Yearly'
-};
-
-export const MOCK_LIBRARY: Library = {
-    books: {
-        'book1': { id: 'book1', title: 'আমার বাংলা বই', author: 'NCTB', totalQuantity: 10, availableQuantity: 8, isbn: '978-984-814-0' },
-        'book2': { id: 'book2', title: 'গণিত সপ্তম শ্রেণি', author: 'NCTB', totalQuantity: 15, availableQuantity: 15, isbn: '978-984-814-1' },
-    },
-    issuedBooks: {
-        'issue1': { id: 'issue1', bookId: 'book1', studentId: 'std1', issueDate: '2024-07-15', dueDate: '2024-07-30', returnDate: null, status: 'issued' },
-    }
-};
-
-export const MOCK_MAIN_EXAMS: { [id: string]: MainExam } = {
-    'exam1': {
-        id: 'exam1',
-        name: 'অর্ধবার্ষিকী পরীক্ষা ২০২৪',
-        date: '2024-08-01',
-        routine: {
-            'c1_subject': 'গণিত', 'c1_date': '2024-08-01', 'c1_time': '09:00',
-            'c2_subject': 'বাংলা', 'c2_date': '2024-08-01', 'c2_time': '09:00',
-        }
-    },
-    'exam2': { id: 'exam2', name: 'বার্ষিক পরীক্ষা ২০২৪', date: '2024-12-10' }
-};
-
-export const MOCK_ROOMS: { [id: string]: Room } = {
-    'room1': { id: 'room1', name: 'রুম ১০১', capacity: 20 },
-    'room2': { id: 'room2', name: 'রুম ১০২', capacity: 25 },
-    'room3': { id: 'room3', name: 'হল রুম', capacity: 50 },
-};
-
-export const MOCK_INVIGILATOR_ROSTERS: InvigilatorRoster = {
-    'exam1': {
-        '2024-08-01': {
-            'room1': 'teacher1',
-            'room2': 'teacher2',
-        },
-         '2024-12-15': { // A future date for testing
-            'room1': 'teacher1'
-        }
-    }
-};
-
-export const MOCK_NOTICES: { [id: string]: Notice } = {
-    'notice1': { id: 'notice1', title: 'বার্ষিক ক্রীড়া প্রতিযোগিতা', content: 'আগামী শুক্রবার, ২০শে আগস্ট, ২০২৪ তারিখে স্কুলের বার্ষিক ক্রীড়া প্রতিযোগিতা অনুষ্ঠিত হবে। সকল ছাত্রছাত্রীকে মাঠে উপস্থিত থাকার জন্য অনুরোধ করা হচ্ছে।', date: '2024-08-15' },
-    'notice2': { id: 'notice2', title: 'অর্ধবার্ষিকী পরীক্ষার ফলাফল', content: 'অর্ধবার্ষিকী পরীক্ষার ফলাফল আগামী সপ্তাহে প্রকাশ করা হবে। শিক্ষার্থীরা স্কুল ওয়েবসাইট থেকে তাদের ফলাফল দেখতে পারবে।', date: '2024-08-12' },
-    'notice3': { id: 'notice3', title: 'অভিভাবক সভা', content: 'সকল শ্রেণীর ছাত্রছাত্রীদের অভিভাবকদের নিয়ে একটি সভা আগামী ২৫শে আগস্ট, ২০২৪ তারিখে সকাল ১০টায় স্কুল অডিটোরিয়ামে অনুষ্ঠিত হবে।', date: '2024-08-10' },
-};
-
-
-export const MOCK_FEE_INVOICES: { [id: string]: FeeInvoice } = {
-    'inv1': { id: 'inv1', name: 'মাসিক বেতন - জুলাই', amount: 1200, dueDate: '2024-07-10' },
-    'inv2': { id: 'inv2', name: 'অর্ধবার্ষিকী পরীক্ষার ফি', amount: 800, dueDate: '2024-07-20' },
-    'inv3': { id: 'inv3', name: 'মাসিক বেতন - আগস্ট', amount: 1200, dueDate: '2024-08-10' },
-};
-
-export const MOCK_STUDENT_PAYMENTS: { [id: string]: StudentPayment } = {
-    'payment1': { id: 'payment1', studentId: 'std1', invoiceId: 'inv1', amountPaid: 1200, paymentDate: '2024-07-08' },
-    'payment2': { id: 'payment2', studentId: 'std1', invoiceId: 'inv2', amountPaid: 800, paymentDate: '2024-07-15' },
-    'payment3': { id: 'payment3', studentId: 'std2', invoiceId: 'inv1', amountPaid: 1200, paymentDate: '2024-07-10' },
 };

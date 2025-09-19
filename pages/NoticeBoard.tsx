@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Notice } from '../types';
@@ -8,7 +7,8 @@ const NoticeBoard: React.FC = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
 
-    const sortedNotices = Object.values(notices).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // FIX: Add explicit types for `a`, `b` to resolve property access errors.
+    const sortedNotices = Object.values(notices).sort((a: Notice, b: Notice) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,7 +78,7 @@ const NoticeBoard: React.FC = () => {
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                      <h2 className="text-xl font-bold text-primary mb-4">সকল নোটিশ</h2>
                      <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
-                        {sortedNotices.length > 0 ? sortedNotices.map(notice => (
+                        {sortedNotices.length > 0 ? sortedNotices.map((notice: Notice) => (
                             <div key={notice.id} className="p-4 bg-light rounded-lg border-l-4 border-secondary relative">
                                 {isAdmin && (
                                     <button 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { exportHtmlToWord } from '../services/wordExporter';
 import EditInvoiceModal from '../components/EditInvoiceModal';
-import { FeeInvoice } from '../types';
+import { FeeInvoice, Student, StudentPayment } from '../types';
 
 const FeesManagement: React.FC = () => {
     const { 
@@ -82,7 +82,8 @@ const FeesManagement: React.FC = () => {
 
 
     const generatePaymentsWord = () => {
-        const tableData = Object.values(studentPayments).map(payment => `
+        // FIX: Add explicit type for `payment` to resolve property access errors.
+        const tableData = Object.values(studentPayments).map((payment: StudentPayment) => `
             <tr>
                 <td>${students[payment.studentId]?.name || 'N/A'}</td>
                 <td>${feeInvoices[payment.invoiceId]?.name || 'N/A'}</td>
@@ -155,14 +156,14 @@ const FeesManagement: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.values(feeInvoices).map(invoice => (
+                            {Object.values(feeInvoices).map((invoice: FeeInvoice) => (
                                 <tr key={invoice.id} className="border-b">
                                     <td className="p-3 text-accent">{invoice.name}</td>
                                     <td className="p-3 text-accent">{invoice.amount.toFixed(2)}</td>
                                     <td className="p-3 text-accent">{invoice.dueDate}</td>
                                     <td className="p-3">
                                         <div className="flex items-center space-x-3">
-                                            <button onClick={() => setEditingInvoice(invoice)} className="text-accent hover:text-blue-700" title="এডিট করুন"><i className="fas fa-edit"></i></button>
+                                            <button onClick={() => setEditingInvoice(invoice)} className="text-amber-600 hover:text-amber-800" title="এডিট করুন"><i className="fas fa-edit"></i></button>
                                             <button onClick={() => handleDeleteInvoice(invoice.id)} className="text-danger hover:text-red-700" title="মুছে ফেলুন"><i className="fas fa-trash"></i></button>
                                         </div>
                                     </td>
@@ -184,14 +185,16 @@ const FeesManagement: React.FC = () => {
                         <label className="font-medium text-sm text-accent">ছাত্র</label>
                         <select value={paymentStudent} onChange={e => setPaymentStudent(e.target.value)} required className="w-full p-2 border rounded-md mt-1">
                             <option value="">ছাত্র নির্বাচন করুন</option>
-                            {Object.values(students).map(s => <option key={s.id} value={s.id}>{s.name} (রোল: {s.roll})</option>)}
+                            {/* FIX: Add explicit type for `s` to resolve property access errors. */}
+                            {Object.values(students).map((s: Student) => <option key={s.id} value={s.id}>{s.name} (রোল: {s.roll})</option>)}
                         </select>
                     </div>
                      <div>
                         <label className="font-medium text-sm text-accent">ইনভয়েস</label>
                         <select value={paymentInvoice} onChange={e => setPaymentInvoice(e.target.value)} required className="w-full p-2 border rounded-md mt-1">
                              <option value="">ইনভয়েস নির্বাচন করুন</option>
-                             {Object.values(feeInvoices).map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+                             {/* FIX: Add explicit type for `i` to resolve property access errors. */}
+                             {Object.values(feeInvoices).map((i: FeeInvoice) => <option key={i.id} value={i.id}>{i.name}</option>)}
                         </select>
                     </div>
                      <div>
@@ -225,7 +228,8 @@ const FeesManagement: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.values(studentPayments).sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()).map(payment => (
+                            {/* FIX: Add explicit types for `a`, `b` to resolve property access errors. */}
+                            {Object.values(studentPayments).sort((a: StudentPayment, b: StudentPayment) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()).map((payment: StudentPayment) => (
                                 <tr key={payment.id} className="border-b">
                                     <td className="p-3 text-accent">{students[payment.studentId]?.name || 'N/A'}</td>
                                     <td className="p-3 text-accent">{feeInvoices[payment.invoiceId]?.name || 'N/A'}</td>

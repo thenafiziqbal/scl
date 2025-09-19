@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { Schedule } from '../types';
 
 const TeacherDashboard: React.FC = () => {
     const { user, schedules, invigilatorRosters, mainExams, rooms } = useApp();
@@ -12,8 +12,9 @@ const TeacherDashboard: React.FC = () => {
 
     if (!user) return null;
 
-    const mySchedules = Object.values(schedules).filter(s => s.teacherId === user.uid);
-    const todaysClasses = mySchedules.filter(s => parseInt(s.day, 10) === todayIndex).sort((a, b) => a.startTime.localeCompare(b.startTime));
+    // FIX: Add explicit type for `s` to resolve property access errors.
+    const mySchedules = Object.values(schedules).filter((s: Schedule) => s.teacherId === user.uid);
+    const todaysClasses = mySchedules.filter((s: Schedule) => parseInt(s.day, 10) === todayIndex).sort((a: Schedule, b: Schedule) => a.startTime.localeCompare(b.startTime));
     
     const myDuties = Object.entries(invigilatorRosters)
         .flatMap(([examId, dates]) => 
@@ -38,7 +39,7 @@ const TeacherDashboard: React.FC = () => {
                     <h2 className="text-xl font-bold text-primary mb-4">আজকের ক্লাস</h2>
                     {todaysClasses.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {todaysClasses.map(s => (
+                            {todaysClasses.map((s: Schedule) => (
                                 <div key={s.id} className="bg-light p-4 rounded-lg border-l-4 border-secondary">
                                     <h4 className="font-bold text-lg">{s.className} ({s.section})</h4>
                                     <p><strong>বিষয়:</strong> {s.subject}</p>
@@ -58,14 +59,14 @@ const TeacherDashboard: React.FC = () => {
                             <div key={day} className="bg-light p-4 rounded-lg">
                                 <h3 className="font-bold text-center border-b-2 border-secondary pb-2 mb-2">{day}</h3>
                                 <div className="space-y-2">
-                                    {mySchedules.filter(s => parseInt(s.day, 10) === index).sort((a,b) => a.startTime.localeCompare(b.startTime)).map(s => (
+                                    {mySchedules.filter((s: Schedule) => parseInt(s.day, 10) === index).sort((a:Schedule,b:Schedule) => a.startTime.localeCompare(b.startTime)).map((s: Schedule) => (
                                         <div key={s.id} className="bg-white p-3 rounded shadow-sm text-sm">
                                             <p className="font-semibold">{s.className} ({s.section})</p>
                                             <p>বিষয়: {s.subject}</p>
                                             <p>সময়: {s.startTime} - {s.endTime}</p>
                                         </div>
                                     ))}
-                                    {mySchedules.filter(s => parseInt(s.day, 10) === index).length === 0 && <p className="text-xs text-center text-gray-500">কোনো ক্লাস নেই</p>}
+                                    {mySchedules.filter((s: Schedule) => parseInt(s.day, 10) === index).length === 0 && <p className="text-xs text-center text-gray-500">কোনো ক্লাস নেই</p>}
                                 </div>
                             </div>
                         ))}

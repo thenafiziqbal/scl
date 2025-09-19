@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useApp } from '../context/AppContext';
 import Card from '../components/Card';
+import { Student } from '../types';
 
 const AdminDashboard: React.FC = () => {
     const { students, teachers, librarians, classes, library, attendance } = useApp();
@@ -19,7 +19,8 @@ const AdminDashboard: React.FC = () => {
 
         // Calculate total students per class
         const totalStudentsByClass: { [key: string]: number } = {};
-        Object.values(students).forEach(student => {
+        // FIX: Add explicit type for student to resolve property access errors.
+        Object.values(students).forEach((student: Student) => {
             const key = `${student.className}___${student.section}`;
             totalStudentsByClass[key] = (totalStudentsByClass[key] || 0) + 1;
         });

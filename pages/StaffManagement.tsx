@@ -1,134 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import EditStaffModal, { StaffData } from '../components/EditStaffModal';
-import { Teacher, Librarian } from '../types';
+import { Teacher, Librarian, DepartmentHead, Class } from '../types';
 
 const StaffManagement: React.FC = () => {
-    const { teachers, librarians, addTeacher, updateTeacher, addLibrarian, updateLibrarian } = useApp();
+    const { teachers, librarians, departmentHeads, classes, createNewUser } = useApp();
     const [editingStaff, setEditingStaff] = useState<StaffData | null>(null);
-    const [isAddingStaff, setIsAddingStaff] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
 
-    const allStaff: StaffData[] = [
-        ...Object.values(teachers).map(t => ({ ...t, role: 'শিক্ষক' as const, details: t.subject })),
-        ...Object.values(librarians).map(l => ({ ...l, role: 'লাইব্রেরিয়ান' as const, details: 'লাইব্রেরি পরিচালনা' }))
-    ];
+    const allStaff: StaffData[] = useMemo(() => [
+        ...Object.values(teachers).map(t => ({ ...t, role: 'শিক্ষক', details: t.subject } as StaffData)),
+        ...Object.values(librarians).map(l => ({ ...l, role: 'লাইব্রেরিয়ান', details: 'Library' } as StaffData)),
+        ...Object.values(departmentHeads).map(d => ({ ...d, role: 'বিভাগীয় প্রধান', details: d.department } as StaffData)),
+    ], [teachers, librarians, departmentHeads]);
 
-    const handleSaveStaff = (updatedStaff: StaffData) => {
-        const { id } = updatedStaff;
-        if (updatedStaff.role === 'শিক্ষক') {
-            const teacherSpecificData: Partial<Teacher> = {
-                name: updatedStaff.name,
-                subject: updatedStaff.details,
-                phone: updatedStaff.phone,
-                email: updatedStaff.email,
-                profilePicUrl: updatedStaff.profilePicUrl
-            };
-            updateTeacher(id, teacherSpecificData);
-        } else {
-             const librarianSpecificData: Partial<Librarian> = {
-                name: updatedStaff.name,
-                phone: updatedStaff.phone,
-                email: updatedStaff.email,
-                profilePicUrl: updatedStaff.profilePicUrl
-            };
-            updateLibrarian(id, librarianSpecificData);
+    const handleEdit = (staff: StaffData) => {
+        setIsAdding(false);
+        setEditingStaff(staff);
+    };
+
+    const handleAdd = () => {
+        setIsAdding(true);
+        setEditingStaff({
+            id: '', name: '', email: '', phone: '', role: 'শিক্ষক', details: '', password: ''
+        });
+    };
+
+    const handleSave = async (staffData: StaffData) => {
+        try {
+            if (isAdding) {
+                await createNewUser(staffData);
+                alert('নতুন স্টাফ সফলভাবে যোগ করা হয়েছে এবং তার জন্য একটি ইউজার একাউন্ট তৈরি করা হয়েছে।');
+            } else {
+                // TODO: Implement update logic for existing staff
+                console.log("Saving staff:", staffData); 
+                alert('স্টাফের তথ্য সেভ করা হয়েছে!');
+            }
+            setEditingStaff(null);
+        } catch (error: any) {
+            console.error("Failed to save staff:", error);
+            if (error.message && error.message.toLowerCase().includes('user already registered')) {
+                alert('এই ইমেইল দিয়ে ইতোমধ্যে একটি একাউন্ট আছে।');
+            } else {
+                alert(`স্টাফ যোগ করতে একটি সমস্যা হয়েছে: ${error.message}`);
+            }
         }
-        setEditingStaff(null);
-        alert('স্টাফের তথ্য সফলভাবে আপডেট করা হয়েছে!');
     };
-    
-    const handleAddStaff = (newStaff: StaffData) => {
-        const { id, role, details, ...rest } = newStaff;
-        if (role === 'শিক্ষক') {
-            const teacherData: Omit<Teacher, 'id'> = {
-                name: rest.name,
-                email: rest.email,
-                phone: rest.phone,
-                profilePicUrl: rest.profilePicUrl,
-                subject: details,
-            };
-            addTeacher(teacherData);
-        } else {
-            const librarianData: Omit<Librarian, 'id'> = {
-                name: rest.name,
-                email: rest.email,
-                phone: rest.phone,
-                profilePicUrl: rest.profilePicUrl,
-            };
-            addLibrarian(librarianData);
-        }
-        setIsAddingStaff(false);
-        alert('নতুন স্টাফ সফলভাবে যোগ করা হয়েছে!');
-    };
-
-    const defaultStaff: StaffData = {
-        id: '', name: '', email: '', phone: '', role: 'শিক্ষক', details: '', profilePicUrl: ''
-    };
-
 
     return (
         <>
-            <div className="space-y-8">
-                <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
-                        <h2 className="text-xl font-bold text-primary">স্টাফদের তালিকা</h2>
-                         <button onClick={() => setIsAddingStaff(true)} className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-accent transition">
-                            <i className="fas fa-user-plus mr-2"></i> নতুন স্টাফ যোগ করুন
-                        </button>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-sidebar text-white">
-                                <tr>
-                                    <th className="p-4 font-semibold">ছবি</th>
-                                    <th className="p-4 font-semibold">নাম</th>
-                                    <th className="p-4 font-semibold">পদ</th>
-                                    <th className="p-4 font-semibold">বিষয়/দায়িত্ব</th>
-                                    <th className="p-4 font-semibold">ইমেইল</th>
-                                    <th className="p-4 font-semibold">অ্যাকশন</th>
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-primary">স্টাফ তালিকা</h2>
+                    <button onClick={handleAdd} className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-accent transition">
+                        <i className="fas fa-plus mr-2"></i> নতুন স্টাফ যোগ করুন
+                    </button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-sidebar text-white">
+                            <tr>
+                                <th className="p-4 font-semibold">নাম</th>
+                                <th className="p-4 font-semibold">পদ</th>
+                                <th className="p-4 font-semibold">বিষয়/বিভাগ</th>
+                                <th className="p-4 font-semibold">ইমেইল</th>
+                                <th className="p-4 font-semibold">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allStaff.map(staff => (
+                                <tr key={staff.id} className="border-b">
+                                    <td className="p-4 flex items-center gap-3">
+                                        <img src={staff.profilePicUrl || 'https://i.pravatar.cc/150?u=staff'} alt={staff.name} className="w-10 h-10 rounded-full object-cover"/>
+                                        <span className="font-medium text-accent">{staff.name}</span>
+                                    </td>
+                                    <td className="p-4 text-gray-700">{staff.role}</td>
+                                    <td className="p-4 text-gray-700">{staff.details}</td>
+                                    <td className="p-4 text-gray-700">{staff.email}</td>
+                                    <td className="p-4">
+                                        <div className="flex items-center space-x-3">
+                                            <button onClick={() => handleEdit(staff)} className="text-amber-600 text-xl hover:text-amber-800" title="এডিট করুন"><i className="fas fa-edit"></i></button>
+                                            <button className="text-danger text-xl hover:text-red-700" title="মুছে ফেলুন"><i className="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {allStaff.map(staff => (
-                                    <tr key={staff.id} className="border-b">
-                                        <td className="p-4">
-                                            <img 
-                                                src={staff.profilePicUrl || 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png'} 
-                                                alt={staff.name} 
-                                                className="w-12 h-12 rounded-full object-cover"
-                                                onError={(e) => (e.currentTarget.src = 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png')}
-                                            />
-                                        </td>
-                                        <td className="p-4 font-medium text-accent">{staff.name}</td>
-                                        <td className="p-4 text-gray-700">{staff.role}</td>
-                                        <td className="p-4 text-gray-700">{staff.details}</td>
-                                        <td className="p-4 text-gray-700">{staff.email}</td>
-                                        <td className="p-4">
-                                            <div className="flex items-center space-x-2">
-                                                <button onClick={() => setEditingStaff(staff)} className="text-accent text-xl hover:text-blue-800"><i className="fas fa-edit"></i></button>
-                                                <button className="text-danger text-xl hover:text-red-800"><i className="fas fa-trash"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-             {isAddingStaff && (
-                <EditStaffModal
-                    staff={defaultStaff}
-                    onClose={() => setIsAddingStaff(false)}
-                    onSave={handleAddStaff}
-                    isAdding={true}
-                />
-            )}
             {editingStaff && (
                 <EditStaffModal
                     staff={editingStaff}
                     onClose={() => setEditingStaff(null)}
-                    onSave={handleSaveStaff}
+                    onSave={handleSave}
+                    isAdding={isAdding}
+                    classes={Object.values(classes)}
                 />
             )}
         </>

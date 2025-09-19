@@ -1,14 +1,15 @@
-export type UserRole = 'admin' | 'teacher' | 'librarian';
+// types.ts
+
+export type UserRole = 'admin' | 'teacher' | 'librarian' | 'department-head' | 'super-admin';
 
 export interface User {
     uid: string;
-    email: string;
     name: string;
+    email: string;
     role: UserRole;
-    password?: string; // For mock authentication
-    profilePicUrl?: string;
-    subject?: string; // For teachers
-    phone?: string; // For staff
+    password?: string;
+    department?: string; // For department-head
+    schoolId?: string; // For multi-tenant
 }
 
 export interface Student {
@@ -19,6 +20,7 @@ export interface Student {
     section: string;
     guardianName: string;
     contact: string;
+    guardianEmail?: string;
     profilePicUrl?: string;
 }
 
@@ -29,6 +31,7 @@ export interface Teacher {
     phone: string;
     email: string;
     profilePicUrl?: string;
+    department: string;
 }
 
 export interface Librarian {
@@ -39,45 +42,13 @@ export interface Librarian {
     profilePicUrl?: string;
 }
 
-export interface Schedule {
+export interface DepartmentHead {
     id: string;
-    day: string; // "0" for Saturday, "1" for Sunday, etc.
-    className: string;
-    section: string;
-    subject: string;
-    teacherId: string;
-    startTime: string;
-    endTime: string;
-}
-
-export interface ClassTest {
-    id: string;
-    examName: string;
-    className: string;
-    section: string;
-    subject: string;
-    totalMarks: number;
-    createdBy: string; // teacher UID
-}
-
-export interface Mark {
-    [studentId: string]: {
-        marksObtained: number;
-    };
-}
-
-export interface MarksSheet {
-    [examId: string]: Mark;
-}
-
-export interface SchoolSettings {
-    schoolName: string;
-    schoolLogoUrl?: string;
-    principalName?: string;
-    principalSignatureUrl?: string;
-    premiumFeatures: {
-        examManagement: boolean;
-    };
+    name: string;
+    phone: string;
+    email: string;
+    profilePicUrl?: string;
+    department: string;
 }
 
 export interface Class {
@@ -90,40 +61,85 @@ export interface Section {
     name: string;
 }
 
-export interface StudentLeave {
+export interface Schedule {
     id: string;
-    studentId: string;
-    reason: string;
+    day: string; // "1" for Sunday, "2" for Monday...
+    startTime: string;
+    endTime: string;
+    className: string;
+    section: string;
+    subject: string;
+    teacherId: string;
+}
+
+export interface Attendance {
+    [date: string]: {
+        [classSectionKey: string]: { // e.g., "Class Six___A"
+            [studentId: string]: { status: 'present' | 'absent' | 'leave' };
+        };
+    };
+}
+
+export interface ClassTest {
+    id: string;
+    examName: string;
+    className: string;
+    section: string;
+    subject: string;
+    totalMarks: number;
+    createdBy: string; // teacherId
+}
+
+export interface Marks {
+    [classTestId: string]: {
+        [studentId: string]: { marksObtained: number, totalMarks: number };
+    };
+}
+
+export interface MainExam {
+    id: string;
+    name: string;
     startDate: string;
     endDate: string;
 }
 
-export interface AttendanceRecord {
-    status: 'present' | 'absent';
+export interface ExamRoutine {
+    id: string;
+    examId: string;
+    date: string;
+    day: string;
+    subject: string;
+    startTime: string;
+    endTime: string;
+    className: string;
 }
 
-export interface DailyAttendance {
-    [studentId: string]: AttendanceRecord;
+export interface Room {
+    id: string;
+    name: string;
+    capacity: number;
 }
 
-export interface ClassAttendance {
-    [classSection: string]: DailyAttendance;
+export interface SeatPlan {
+    [examId: string]: {
+        [date: string]: {
+            [roomId: string]: string[]; // studentIds
+        };
+    };
 }
 
-export interface Attendance {
-    [date: string]: ClassAttendance;
-}
-
-export interface Subscription {
-    status: 'Active' | 'Inactive';
-    tier: 'None' | 'Monthly' | 'Yearly';
+export interface InvigilatorRoster {
+    [examId: string]: {
+        [date: string]: {
+            [roomId:string]: string; // teacherId
+        };
+    };
 }
 
 export interface Book {
     id: string;
     title: string;
     author: string;
-    isbn?: string;
     totalQuantity: number;
     availableQuantity: number;
 }
@@ -134,41 +150,29 @@ export interface IssuedBook {
     studentId: string;
     issueDate: string;
     dueDate: string;
-    returnDate: string | null;
     status: 'issued' | 'returned';
+    returnDate?: string;
 }
 
 export interface Library {
-    books: { [id: string]: Book };
-    issuedBooks: { [id: string]: IssuedBook };
+    books: { [bookId: string]: Book };
+    issuedBooks: { [issueId: string]: IssuedBook };
 }
 
-export interface MainExam {
+export interface StudentLeave {
     id: string;
-    name: string;
-    date: string; // Start date
-    routine?: { [key: string]: string }; // e.g., { 'c1_subject': 'Math', 'c1_date': '2024-08-01', 'c1_time': '09:00' }
-}
-
-export interface Room {
-    id: string;
-    name: string;
-    capacity: number;
-}
-
-export interface InvigilatorRoster {
-    [examId: string]: {
-        [date: string]: {
-            [roomId: string]: string; // teacherId
-        };
-    };
+    studentId: string;
+    reason: string;
+    startDate: string;
+    endDate: string;
+    status: 'pending' | 'approved' | 'rejected';
 }
 
 export interface Notice {
     id: string;
     title: string;
     content: string;
-    date: string; // YYYY-MM-DD
+    date: string;
 }
 
 export interface FeeInvoice {
@@ -184,4 +188,29 @@ export interface StudentPayment {
     invoiceId: string;
     amountPaid: number;
     paymentDate: string;
+}
+
+export interface Subscription {
+    tier: string;
+    status: 'Active' | 'Inactive';
+    endDate: string;
+}
+
+export interface SchoolSettings {
+    schoolName: string;
+    schoolLogoUrl: string;
+    principalName: string;
+    principalSignatureUrl: string;
+    premiumFeatures: {
+        examManagement: boolean;
+    };
+}
+
+// For multi-tenant version
+export interface School {
+    id: string;
+    name: string;
+    principalName: string;
+    principalEmail: string;
+    status: 'active' | 'inactive';
 }

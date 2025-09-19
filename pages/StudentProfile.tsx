@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import IDCardModal from '../components/IDCardModal';
 import { exportHtmlToWord } from '../services/wordExporter';
+import { IssuedBook, StudentPayment, Student } from '../types';
 
 const StudentProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { students, classTests, marks, library, settings, feeInvoices, studentPayments } = useApp();
-    const [idCardStudent, setIdCardStudent] = useState<typeof students[0] | null>(null);
+    const { students, classTests, marks, library, settings, feeInvoices, studentPayments, attendance } = useApp();
+    const [idCardStudent, setIdCardStudent] = useState<Student | null>(null);
 
     if (!id) return <p>ছাত্রের ID পাওয়া যায়নি।</p>;
     const student = students[id];
@@ -26,12 +27,14 @@ const StudentProfile: React.FC = () => {
         })
         .filter(Boolean);
         
+    // FIX: Add explicit type for `issue` to resolve property access errors.
     const studentIssuedBooks = Object.values(library.issuedBooks)
-        .filter(issue => issue.studentId === id)
-        .map(issue => ({ ...issue, bookTitle: library.books[issue.bookId]?.title || 'Unknown Book' }));
+        .filter((issue: IssuedBook) => issue.studentId === id)
+        .map((issue: IssuedBook) => ({ ...issue, bookTitle: library.books[issue.bookId]?.title || 'Unknown Book' }));
 
     const studentFeeHistory = Object.values(feeInvoices).map(invoice => {
-        const payment = Object.values(studentPayments).find(p => p.studentId === id && p.invoiceId === invoice.id);
+        // FIX: Add explicit type for `p` to resolve property access errors.
+        const payment = Object.values(studentPayments).find((p: StudentPayment) => p.studentId === id && p.invoiceId === invoice.id);
         return {
             ...invoice,
             status: payment ? 'Paid' : 'Unpaid',
@@ -48,6 +51,26 @@ const StudentProfile: React.FC = () => {
         if (percentage >= 33) return 'D';
         return 'F';
     };
+
+    const calculateAttendance = () => {
+        const classSectionKey = `${student.className}___${student.section}`;
+        let totalDays = 0;
+        let presentDays = 0;
+
+        for (const date in attendance) {
+            if (attendance[date][classSectionKey]) {
+                totalDays++;
+                if (attendance[date][classSectionKey][student.id]?.status === 'present') {
+                    presentDays++;
+                }
+            }
+        }
+        if (totalDays === 0) return { percentage: 0, text: "N/A" };
+        const percentage = Math.round((presentDays / totalDays) * 100);
+        return { percentage, text: `${percentage}% (${presentDays}/${totalDays} দিন)` };
+    };
+
+    const attendanceData = calculateAttendance();
     
     const generateTranscriptWord = () => {
         let marksHtml = `
@@ -99,6 +122,7 @@ const StudentProfile: React.FC = () => {
                 <p><strong>ছাত্রের নাম:</strong> ${student.name}</p>
                 <p><strong>ক্লাস:</strong> ${student.className} (${student.section})</p>
                 <p><strong>রোল:</strong> ${student.roll}</p>
+                <p><strong>উপস্থিতির হার:</strong> ${attendanceData.text}</p>
                 <br/>
                 ${marksHtml}
                 <br/>
@@ -125,6 +149,10 @@ const StudentProfile: React.FC = () => {
                     <p className="text-gray-600"><strong>রোল:</strong> {student.roll}</p>
                     <p className="text-gray-600"><strong>অভিভাবকের নাম:</strong> {student.guardianName}</p>
                     <p className="text-gray-600"><strong>যোগাযোগ:</strong> {student.contact}</p>
+                    {student.guardianEmail && <p className="text-gray-600"><strong>অভিভাবকের ইমেইল:</strong> {student.guardianEmail}</p>}
+                    <div className="mt-2 pt-2 border-t">
+                        <p className="text-gray-600 font-semibold"><strong>উপস্থিতির হার:</strong> <span className="text-green-600 font-bold">{attendanceData.text}</span></p>
+                    </div>
                 </div>
                  <div className="md:ml-auto flex flex-col sm:flex-row gap-2 self-center md:self-start">
                     <button onClick={() => setIdCardStudent(student)} className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition flex items-center gap-2">

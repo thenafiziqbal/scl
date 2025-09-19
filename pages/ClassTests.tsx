@@ -1,13 +1,14 @@
-
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { ClassTest } from '../types';
 
 const ClassTests: React.FC = () => {
     const { user, classTests } = useApp();
 
     if (!user) return null;
 
-    const myTests = Object.values(classTests).filter(test => test.createdBy === user.uid);
+    // FIX: Add explicit type for `test` to resolve property access errors.
+    const myTests = Object.values(classTests).filter((test: ClassTest) => test.createdBy === user.uid);
 
     return (
         <div className="space-y-8">
@@ -30,7 +31,7 @@ const ClassTests: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {myTests.map(test => (
+                            {myTests.map((test: ClassTest) => (
                                 <tr key={test.id} className="border-b">
                                     <td className="p-4 text-gray-800">{test.examName}</td>
                                     <td className="p-4 text-gray-700">{test.className} ({test.section})</td>
@@ -39,7 +40,7 @@ const ClassTests: React.FC = () => {
                                     <td className="p-4">
                                         <div className="flex items-center space-x-2">
                                             <button className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition">নম্বর দিন</button>
-                                            <button className="text-danger text-xl hover:text-red-800"><i className="fas fa-trash"></i></button>
+                                            <button className="text-danger text-xl hover:text-red-700"><i className="fas fa-trash"></i></button>
                                         </div>
                                     </td>
                                 </tr>

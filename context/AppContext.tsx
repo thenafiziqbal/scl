@@ -1,422 +1,453 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, SchoolSettings, Student, Teacher, Librarian, Schedule, ClassTest, MarksSheet, Class, Section, StudentLeave, Attendance, Subscription, Library, MainExam, Room, InvigilatorRoster, Notice, DailyAttendance, FeeInvoice, StudentPayment } from '../types';
-import { MOCK_USERS, MOCK_SCHOOL_SETTINGS, MOCK_STUDENTS, MOCK_TEACHERS, MOCK_LIBRARIANS, MOCK_SCHEDULES, MOCK_CLASS_TESTS, MOCK_MARKS, MOCK_CLASSES, MOCK_SECTIONS, MOCK_LEAVES, MOCK_ATTENDANCE, MOCK_SUBSCRIPTION, MOCK_LIBRARY, MOCK_MAIN_EXAMS, MOCK_ROOMS, MOCK_INVIGILATOR_ROSTERS, MOCK_NOTICES, MOCK_FEE_INVOICES, MOCK_STUDENT_PAYMENTS } from '../services/mockData';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { 
+    User, Student, Teacher, Librarian, DepartmentHead, Class, Section, Schedule, Attendance, ClassTest, Marks,
+    MainExam, ExamRoutine, Room, SeatPlan, InvigilatorRoster, Library, StudentLeave, Notice, 
+    FeeInvoice, StudentPayment, Subscription, SchoolSettings, UserRole, Book, IssuedBook
+} from '../types';
+import { StaffData } from '../components/EditStaffModal';
+import {
+    mockUsers, mockStudents, mockTeachers, mockLibrarians, mockDepartmentHeads,
+    mockClasses, mockSections, mockSchedules, mockAttendance, mockClassTests, mockMarks,
+    mockMainExams, mockExamRoutines, mockRooms, mockSeatPlans, mockInvigilatorRosters,
+    mockLibrary, mockLeaves, mockNotices, mockFeeInvoices, mockStudentPayments,
+    mockSubscription, mockSettings
+} from '../services/mockData';
+
+
+const generateId = (prefix: string) => `${prefix}${Date.now()}${Math.random().toString(36).substr(2, 5)}`;
+
+type TeacherWithUser = Teacher & { uid: string; role: UserRole; password?: string; };
+type LibrarianWithUser = Librarian & { uid: string; role: UserRole; password?: string; };
+type DepartmentHeadWithUser = DepartmentHead & { uid: string; role: UserRole; password?: string; };
+
 
 interface AppContextType {
-    user: User | null;
-    login: (email: string, password: string) => boolean;
+    user: (User & { department?: string }) | null;
+    loading: boolean;
+    login: (email: string, password:string) => Promise<void>;
     logout: () => void;
-    settings: SchoolSettings;
+    
     students: { [id: string]: Student };
-    teachers: { [id: string]: Teacher };
-    librarians: { [id: string]: Librarian };
-    schedules: { [id: string]: Schedule };
-    classTests: { [id: string]: ClassTest };
-    marks: MarksSheet;
+    addStudent: (student: Omit<Student, 'id'>) => Promise<void>;
+    updateStudent: (id: string, data: Student) => Promise<void>;
+    
+    teachers: { [id: string]: TeacherWithUser };
+    librarians: { [id: string]: LibrarianWithUser };
+    departmentHeads: { [id: string]: DepartmentHeadWithUser };
+    createNewUser: (staffData: StaffData) => Promise<void>;
+
     classes: { [id: string]: Class };
     sections: { [id: string]: Section };
-    leaves: { [id: string]: StudentLeave };
+    schedules: { [id: string]: Schedule };
+    
     attendance: Attendance;
-    subscription: Subscription;
-    library: Library;
+    updateAttendance: (date: string, classSectionKey: string, studentId: string, status: 'present' | 'absent' | 'leave') => Promise<void>;
+
+    classTests: { [id: string]: ClassTest };
+    marks: Marks;
+    
     mainExams: { [id: string]: MainExam };
+    addMainExam: (exam: Omit<MainExam, 'id'>) => Promise<void>;
+    
+    examRoutines: { [id: string]: ExamRoutine };
+    addExamRoutine: (routine: Omit<ExamRoutine, 'id'>) => Promise<void>;
+
     rooms: { [id: string]: Room };
+    seatPlans: SeatPlan;
+    updateSeatPlan: (examId: string, date: string, roomId: string, studentIds: string[]) => Promise<void>;
+
     invigilatorRosters: InvigilatorRoster;
+    updateInvigilatorRoster: (examId: string, date: string, roomId: string, teacherId: string) => Promise<void>;
+
+    library: Library;
+    addBook: (book: Omit<Book, 'id' | 'availableQuantity'>) => Promise<void>;
+    issueBook: (issue: Omit<IssuedBook, 'id'|'status'>) => Promise<void>;
+    returnBook: (issueId: string) => Promise<void>;
+
+    leaves: { [id: string]: StudentLeave };
+    addLeave: (leave: Omit<StudentLeave, 'id'>) => Promise<void>;
+    updateLeave: (id: string, data: StudentLeave) => Promise<void>;
+    deleteLeave: (id: string) => Promise<void>;
+    
     notices: { [id: string]: Notice };
+    addNotice: (notice: Omit<Notice, 'id'>) => Promise<void>;
+    deleteNotice: (id: string) => Promise<void>;
+    
     feeInvoices: { [id: string]: FeeInvoice };
+    addFeeInvoice: (invoice: Omit<FeeInvoice, 'id'>) => Promise<void>;
+    updateFeeInvoice: (id: string, data: FeeInvoice) => Promise<void>;
+    deleteFeeInvoice: (id: string) => Promise<void>;
+
     studentPayments: { [id: string]: StudentPayment };
-    addStudent: (student: Omit<Student, 'id'>) => void;
-    updateStudent: (studentId: string, updatedData: Partial<Student>) => void;
-    addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
-    updateTeacher: (teacherId: string, updatedData: Partial<Teacher>) => void;
-    addLibrarian: (librarian: Omit<Librarian, 'id'>) => void;
-    updateLibrarian: (librarianId: string, updatedData: Partial<Librarian>) => void;
-    addMainExam: (exam: Omit<MainExam, 'id'>) => void;
-    deleteMainExam: (id: string) => void;
-    addRoom: (room: Omit<Room, 'id'>) => void;
-    deleteRoom: (id: string) => void;
-    saveInvigilatorRoster: (examId: string, date: string, roster: { [roomId: string]: string }) => void;
-    addSchedule: (schedule: Omit<Schedule, 'id'>) => void;
-    deleteSchedule: (id: string) => void;
-    addNotice: (notice: Omit<Notice, 'id'>) => void;
-    deleteNotice: (id: string) => void;
-    saveAttendance: (date: string, classSection: string, dailyAttendance: DailyAttendance) => void;
-    addFeeInvoice: (invoice: Omit<FeeInvoice, 'id'>) => void;
-    updateFeeInvoice: (invoiceId: string, updatedData: Partial<FeeInvoice>) => void;
-    deleteFeeInvoice: (id: string) => void;
-    recordStudentPayment: (payment: Omit<StudentPayment, 'id'>) => void;
-    addClass: (name: string) => void;
-    deleteClass: (id: string) => void;
-    addSection: (name: string) => void;
-    deleteSection: (id: string) => void;
-    updateSettings: (newSettings: SchoolSettings) => void;
-    updateClass: (id: string, newName: string) => void;
-    updateSection: (id: string, newName: string) => void;
+    recordStudentPayment: (payment: Omit<StudentPayment, 'id'>) => Promise<void>;
+    
+    subscription: Subscription;
+    settings: SchoolSettings;
+    updateSettings: (newSettings: SchoolSettings) => Promise<void>;
+    
+    backupData: () => void;
+    restoreData: (data: any) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [settings, setSettings] = useState<SchoolSettings>(MOCK_SCHOOL_SETTINGS);
-    const [students, setStudents] = useState<{ [id: string]: Student }>(MOCK_STUDENTS);
-    const [teachers, setTeachers] = useState<{ [id: string]: Teacher }>(MOCK_TEACHERS);
-    const [librarians, setLibrarians] = useState<{ [id: string]: Librarian }>(MOCK_LIBRARIANS);
-    const [schedules, setSchedules] = useState<{ [id: string]: Schedule }>(MOCK_SCHEDULES);
-    const [classTests, setClassTests] = useState<{ [id: string]: ClassTest }>(MOCK_CLASS_TESTS);
-    const [marks, setMarks] = useState<MarksSheet>(MOCK_MARKS);
-    const [classes, setClasses] = useState<{ [id: string]: Class }>(MOCK_CLASSES);
-    const [sections, setSections] = useState<{ [id: string]: Section }>(MOCK_SECTIONS);
-    const [leaves, setLeaves] = useState<{ [id: string]: StudentLeave }>(MOCK_LEAVES);
-    const [attendance, setAttendance] = useState<Attendance>(MOCK_ATTENDANCE);
-    const [subscription, setSubscription] = useState<Subscription>(MOCK_SUBSCRIPTION);
-    const [library, setLibrary] = useState<Library>(MOCK_LIBRARY);
-    const [mainExams, setMainExams] = useState<{ [id: string]: MainExam }>(MOCK_MAIN_EXAMS);
-    const [rooms, setRooms] = useState<{ [id: string]: Room }>(MOCK_ROOMS);
-    const [invigilatorRosters, setInvigilatorRosters] = useState<InvigilatorRoster>(MOCK_INVIGILATOR_ROSTERS);
-    const [notices, setNotices] = useState<{ [id: string]: Notice }>(MOCK_NOTICES);
-    const [feeInvoices, setFeeInvoices] = useState<{ [id: string]: FeeInvoice }>(MOCK_FEE_INVOICES);
-    const [studentPayments, setStudentPayments] = useState<{ [id: string]: StudentPayment }>(MOCK_STUDENT_PAYMENTS);
+    const [user, setUser] = useState<(User & { department?: string }) | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const login = (email: string, password: string): boolean => {
-        const foundUser = Object.values(MOCK_USERS).find(u => u.email === email && u.password === password);
-        if (foundUser) {
-            const { password: _, ...userWithoutPassword } = foundUser;
-            
-            let fullUserProfile: User = { ...userWithoutPassword };
+    const [allUsers, setAllUsers] = useState<{ [uid: string]: User }>(mockUsers);
+    const [students, setStudents] = useState<{ [id: string]: Student }>(mockStudents);
+    const [teachers, setTeachers] = useState<{ [id: string]: TeacherWithUser }>(mockTeachers);
+    const [librarians, setLibrarians] = useState<{ [id: string]: LibrarianWithUser }>(mockLibrarians);
+    const [departmentHeads, setDepartmentHeads] = useState<{ [id: string]: DepartmentHeadWithUser }>(mockDepartmentHeads);
+    const [classes, setClasses] = useState<{ [id: string]: Class }>(mockClasses);
+    const [sections, setSections] = useState<{ [id: string]: Section }>(mockSections);
+    const [schedules, setSchedules] = useState<{ [id: string]: Schedule }>(mockSchedules);
+    const [attendance, setAttendance] = useState<Attendance>(mockAttendance);
+    const [classTests, setClassTests] = useState<{ [id: string]: ClassTest }>(mockClassTests);
+    const [marks, setMarks] = useState<Marks>(mockMarks);
+    const [mainExams, setMainExams] = useState<{ [id: string]: MainExam }>(mockMainExams);
+    const [examRoutines, setExamRoutines] = useState<{ [id: string]: ExamRoutine }>(mockExamRoutines);
+    const [rooms, setRooms] = useState<{ [id: string]: Room }>(mockRooms);
+    const [seatPlans, setSeatPlans] = useState<SeatPlan>(mockSeatPlans);
+    const [invigilatorRosters, setInvigilatorRosters] = useState<InvigilatorRoster>(mockInvigilatorRosters);
+    const [library, setLibrary] = useState<Library>(mockLibrary);
+    const [leaves, setLeaves] = useState<{ [id: string]: StudentLeave }>(mockLeaves);
+    const [notices, setNotices] = useState<{ [id: string]: Notice }>(mockNotices);
+    const [feeInvoices, setFeeInvoices] = useState<{ [id: string]: FeeInvoice }>(mockFeeInvoices);
+    const [studentPayments, setStudentPayments] = useState<{ [id: string]: StudentPayment }>(mockStudentPayments);
+    const [subscription, setSubscription] = useState<Subscription>(mockSubscription);
+    const [settings, setSettings] = useState<SchoolSettings>(mockSettings);
 
-            if (userWithoutPassword.role === 'teacher' && MOCK_TEACHERS[userWithoutPassword.uid]) {
-                const teacherProfile = MOCK_TEACHERS[userWithoutPassword.uid];
-                fullUserProfile = { ...fullUserProfile, ...teacherProfile };
-            } else if (userWithoutPassword.role === 'librarian' && MOCK_LIBRARIANS[userWithoutPassword.uid]) {
-                const librarianProfile = MOCK_LIBRARIANS[userWithoutPassword.uid];
-                fullUserProfile = { ...fullUserProfile, ...librarianProfile };
+
+    useEffect(() => {
+        // Mock session management
+        try {
+            const storedUser = sessionStorage.getItem('school-user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
             }
-            setUser(fullUserProfile);
-            return true;
+        } catch (error) {
+            console.error("Failed to parse user from session storage", error);
+            sessionStorage.removeItem('school-user');
+        } finally {
+            setLoading(false);
         }
-        return false;
+    }, []);
+    
+
+    const login = async (email: string, password: string): Promise<void> => {
+        setLoading(true);
+        const foundUser = Object.values(allUsers).find(u => u.email === email && u.password === password);
+        
+        if (foundUser) {
+            setUser(foundUser);
+            sessionStorage.setItem('school-user', JSON.stringify(foundUser));
+            setLoading(false);
+        } else {
+            setLoading(false);
+            throw new Error("Invalid login credentials");
+        }
     };
 
     const logout = () => {
         setUser(null);
+        sessionStorage.removeItem('school-user');
     };
     
-    const addStudent = (studentData: Omit<Student, 'id'>) => {
-        const newId = `student${Object.keys(students).length + 1}`;
-        const newStudent: Student = { id: newId, ...studentData };
-        setStudents(prev => ({ ...prev, [newId]: newStudent }));
+    const addStudent = async (student: Omit<Student, 'id'>) => {
+        const id = generateId('stu');
+        const newStudent = { id, ...student };
+        setStudents(prev => ({ ...prev, [id]: newStudent }));
+    };
+    
+    const updateStudent = async (id: string, studentData: Student) => {
+        setStudents(prev => ({ ...prev, [id]: studentData }));
     };
 
-    const updateStudent = (studentId: string, updatedData: Partial<Student>) => {
-        setStudents(prev => ({
-            ...prev,
-            [studentId]: { ...prev[studentId], ...updatedData }
-        }));
-    };
+    const createNewUser = async (staffData: StaffData): Promise<void> => {
+        const emailExists = Object.values(allUsers).some(u => u.email === staffData.email);
+        if (emailExists) {
+            throw new Error("User already registered");
+        }
+        
+        const uid = generateId('usr');
+        const staffId = generateId('stf');
+        const roleMap: {[key: string]: UserRole} = { 'শিক্ষক': 'teacher', 'লাইব্রেরিয়ান': 'librarian', 'বিভাগীয় প্রধান': 'department-head'};
+        const userRole = roleMap[staffData.role];
 
-    const addTeacher = (teacherData: Omit<Teacher, 'id'>) => {
-        const newId = `teacher${Date.now()}`;
-        const newTeacher: Teacher = { id: newId, ...teacherData };
-        setTeachers(prev => ({ ...prev, [newId]: newTeacher }));
-    };
+        const newUser: User = {
+            uid,
+            name: staffData.name,
+            email: staffData.email,
+            password: staffData.password,
+            role: userRole,
+            department: userRole === 'department-head' ? staffData.details : undefined
+        };
+        setAllUsers(prev => ({...prev, [uid]: newUser}));
 
-    const updateTeacher = (teacherId: string, updatedData: Partial<Teacher>) => {
-        setTeachers(prev => ({
-            ...prev,
-            [teacherId]: { ...prev[teacherId], ...updatedData }
-        }));
-    };
+        const commonStaffData = {
+            id: staffId,
+            uid,
+            role: userRole,
+            name: staffData.name,
+            email: staffData.email,
+            phone: staffData.phone,
+            profilePicUrl: staffData.profilePicUrl,
+        };
 
-    const addLibrarian = (librarianData: Omit<Librarian, 'id'>) => {
-        const newId = `librarian${Date.now()}`;
-        const newLibrarian: Librarian = { id: newId, ...librarianData };
-        setLibrarians(prev => ({ ...prev, [newId]: newLibrarian }));
+        if(userRole === 'teacher') {
+            setTeachers(prev => ({ ...prev, [staffId]: { ...commonStaffData, subject: staffData.details, department: '' } }));
+        } else if (userRole === 'librarian') {
+            setLibrarians(prev => ({...prev, [staffId]: { ...commonStaffData }}));
+        } else if (userRole === 'department-head') {
+            setDepartmentHeads(prev => ({...prev, [staffId]: { ...commonStaffData, department: staffData.details }}));
+        }
     };
-
-    const updateLibrarian = (librarianId: string, updatedData: Partial<Librarian>) => {
-        setLibrarians(prev => ({
-            ...prev,
-            [librarianId]: { ...prev[librarianId], ...updatedData }
-        }));
-    };
-
-    const addMainExam = (examData: Omit<MainExam, 'id'>) => {
-        const newId = `exam${Date.now()}`;
-        const newExam: MainExam = { id: newId, ...examData };
-        setMainExams(prev => ({ ...prev, [newId]: newExam }));
-    };
-
-    const deleteMainExam = (id: string) => {
-        setMainExams(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
+    
+    const updateAttendance = async (date: string, classSectionKey: string, studentId: string, status: 'present' | 'absent' | 'leave') => {
+        setAttendance(prev => {
+            const newAttendance = JSON.parse(JSON.stringify(prev)); // Deep copy
+            if (!newAttendance[date]) newAttendance[date] = {};
+            if (!newAttendance[date][classSectionKey]) newAttendance[date][classSectionKey] = {};
+            newAttendance[date][classSectionKey][studentId] = { status };
+            return newAttendance;
         });
     };
 
-    const addRoom = (roomData: Omit<Room, 'id'>) => {
-        const newId = `room${Date.now()}`;
-        const newRoom: Room = { id: newId, ...roomData };
-        setRooms(prev => ({ ...prev, [newId]: newRoom }));
+    const addMainExam = async (exam: Omit<MainExam, 'id'>) => {
+        const id = generateId('exam');
+        setMainExams(prev => ({...prev, [id]: {id, ...exam}}));
     };
 
-    const deleteRoom = (id: string) => {
-        setRooms(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
+    const addExamRoutine = async (routine: Omit<ExamRoutine, 'id'>) => {
+        const id = generateId('routine');
+        setExamRoutines(prev => ({...prev, [id]: {id, ...routine}}));
+    };
+
+    const updateSeatPlan = async (examId: string, date: string, roomId: string, studentIds: string[]) => {
+        setSeatPlans(prev => {
+            const newPlans = JSON.parse(JSON.stringify(prev));
+            if(!newPlans[examId]) newPlans[examId] = {};
+            if(!newPlans[examId][date]) newPlans[examId][date] = {};
+            newPlans[examId][date][roomId] = studentIds;
+            return newPlans;
         });
     };
-    
-    const saveInvigilatorRoster = (examId: string, date: string, roster: { [roomId: string]: string }) => {
-        setInvigilatorRosters(prev => ({
-            ...prev,
-            [examId]: {
-                ...prev[examId],
-                [date]: roster
-            }
-        }));
-    };
 
-    const addSchedule = (scheduleData: Omit<Schedule, 'id'>) => {
-        const newId = `sch${Date.now()}`;
-        const newSchedule: Schedule = { id: newId, ...scheduleData };
-        setSchedules(prev => ({ ...prev, [newId]: newSchedule }));
-    };
-
-    const deleteSchedule = (id: string) => {
-        setSchedules(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
+    const updateInvigilatorRoster = async (examId: string, date: string, roomId: string, teacherId: string) => {
+        setInvigilatorRosters(prev => {
+            const newRosters = JSON.parse(JSON.stringify(prev));
+            if(!newRosters[examId]) newRosters[examId] = {};
+            if(!newRosters[examId][date]) newRosters[examId][date] = {};
+            newRosters[examId][date][roomId] = teacherId;
+            return newRosters;
         });
     };
-    
-    const addNotice = (noticeData: Omit<Notice, 'id'>) => {
-        const newId = `notice${Date.now()}`;
-        const newNotice: Notice = { id: newId, ...noticeData };
-        setNotices(prev => ({ ...prev, [newId]: newNotice }));
+
+    const addBook = async (book: Omit<Book, 'id' | 'availableQuantity'>) => {
+        const id = generateId('book');
+        const newBook: Book = { id, ...book, availableQuantity: book.totalQuantity };
+        setLibrary(prev => ({ ...prev, books: {...prev.books, [id]: newBook} }));
     };
 
-    const deleteNotice = (id: string) => {
+    const issueBook = async (issue: Omit<IssuedBook, 'id'|'status'>) => {
+        const { bookId } = issue;
+        const book = library.books[bookId];
+
+        if (book && book.availableQuantity > 0) {
+            const id = generateId('issue');
+            const newIssue: IssuedBook = { id, ...issue, status: 'issued' };
+
+            setLibrary(prev => {
+                const updatedBooks = { ...prev.books };
+                updatedBooks[bookId].availableQuantity -= 1;
+                return {
+                    ...prev,
+                    books: updatedBooks,
+                    issuedBooks: {...prev.issuedBooks, [id]: newIssue}
+                }
+            });
+            alert('বই সফলভাবে ইস্যু করা হয়েছে!');
+        } else {
+            alert('এই বইটি বর্তমানে লাইব্রেরিতে নেই।');
+        }
+    };
+
+    const returnBook = async (issueId: string) => {
+        const issue = library.issuedBooks[issueId];
+        if (issue) {
+            setLibrary(prev => {
+                const updatedBooks = { ...prev.books };
+                if (updatedBooks[issue.bookId]) {
+                     updatedBooks[issue.bookId].availableQuantity += 1;
+                }
+                const updatedIssues = { ...prev.issuedBooks };
+                updatedIssues[issueId] = { ...issue, status: 'returned', returnDate: new Date().toISOString().slice(0,10)};
+
+                return { ...prev, books: updatedBooks, issuedBooks: updatedIssues };
+            });
+            alert('বইটি সফলভাবে ফেরত নেওয়া হয়েছে।');
+        }
+    };
+
+    const addNotice = async (notice: Omit<Notice, 'id'>) => {
+        const id = generateId('notice');
+        setNotices(prev => ({...prev, [id]: {id, ...notice}}));
+    };
+    
+    const deleteNotice = async (id: string) => {
         setNotices(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
+            const newNotices = {...prev};
+            delete newNotices[id];
+            return newNotices;
         });
     };
 
-    const saveAttendance = (date: string, classSection: string, dailyAttendance: DailyAttendance) => {
-        setAttendance(prev => ({
-            ...prev,
-            [date]: {
-                ...prev[date],
-                [classSection]: dailyAttendance
-            }
-        }));
+    const addFeeInvoice = async (invoice: Omit<FeeInvoice, 'id'>) => {
+        const id = generateId('inv');
+        setFeeInvoices(prev => ({...prev, [id]: {id, ...invoice}}));
     };
-    
-    const addFeeInvoice = (invoiceData: Omit<FeeInvoice, 'id'>) => {
-        const newId = `inv${Date.now()}`;
-        const newInvoice: FeeInvoice = { id: newId, ...invoiceData };
-        setFeeInvoices(prev => ({ ...prev, [newId]: newInvoice }));
+    const updateFeeInvoice = async (id: string, data: FeeInvoice) => {
+        setFeeInvoices(prev => ({...prev, [id]: data}));
     };
-
-    const updateFeeInvoice = (invoiceId: string, updatedData: Partial<FeeInvoice>) => {
-        setFeeInvoices(prev => ({
-            ...prev,
-            [invoiceId]: { ...prev[invoiceId], ...updatedData }
-        }));
-    };
-    
-    const deleteFeeInvoice = (id: string) => {
-        if (Object.values(studentPayments).some(p => p.invoiceId === id)) {
-            alert('এই ইনভয়েসের বিপরীতে পেমেন্ট থাকায় এটি মুছে ফেলা যাবে না।');
-            return;
-        }
+    const deleteFeeInvoice = async (id: string) => {
         setFeeInvoices(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
+            const newInvoices = {...prev};
+            delete newInvoices[id];
+            return newInvoices;
         });
     };
 
-    const recordStudentPayment = (paymentData: Omit<StudentPayment, 'id'>) => {
-        const newId = `payment${Date.now()}`;
-        const newPayment: StudentPayment = { id: newId, ...paymentData };
-        setStudentPayments(prev => ({ ...prev, [newId]: newPayment }));
+    const recordStudentPayment = async (payment: Omit<StudentPayment, 'id'>) => {
+        const id = generateId('pay');
+        setStudentPayments(prev => ({...prev, [id]: {id, ...payment}}));
     };
 
-    const addClass = (name: string) => {
-        if (!name.trim()) return;
-        const newId = `c${Date.now()}`;
-        const newClass: Class = { id: newId, name: name.trim() };
-        setClasses(prev => ({ ...prev, [newId]: newClass }));
+    const addLeave = async (leave: Omit<StudentLeave, 'id'>) => {
+        const id = generateId('leave');
+        setLeaves(prev => ({...prev, [id]: {id, ...leave}}));
     };
-
-    const deleteClass = (id: string) => {
-        const isUsed = Object.values(students).some(s => s.className === classes[id]?.name) || 
-                       Object.values(schedules).some(s => s.className === classes[id]?.name);
-        if (isUsed) {
-            alert('এই ক্লাসটি ছাত্র বা শিডিউলে ব্যবহৃত হচ্ছে, তাই মুছে ফেলা যাবে না।');
-            return;
-        }
-        setClasses(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
+    const updateLeave = async (id: string, data: StudentLeave) => {
+        setLeaves(prev => ({...prev, [id]: data}));
+    };
+    const deleteLeave = async (id: string) => {
+        setLeaves(prev => {
+            const newLeaves = {...prev};
+            delete newLeaves[id];
+            return newLeaves;
         });
     };
 
-    const addSection = (name: string) => {
-        if (!name.trim()) return;
-        const newId = `s${Date.now()}`;
-        const newSection: Section = { id: newId, name: name.trim() };
-        setSections(prev => ({ ...prev, [newId]: newSection }));
-    };
-
-    const deleteSection = (id: string) => {
-        const isUsed = Object.values(students).some(s => s.section === sections[id]?.name) || 
-                       Object.values(schedules).some(s => s.section === sections[id]?.name);
-        if (isUsed) {
-            alert('এই বিভাগটি ছাত্র বা শিডিউলে ব্যবহৃত হচ্ছে, তাই মুছে ফেলা যাবে না।');
-            return;
-        }
-        setSections(prev => {
-            const newState = { ...prev };
-            delete newState[id];
-            return newState;
-        });
-    };
-    
-    const updateSettings = (newSettings: SchoolSettings) => {
+    const updateSettings = async (newSettings: SchoolSettings) => {
         setSettings(newSettings);
     };
-
-    const updateClass = (id: string, newName: string) => {
-        const oldName = classes[id]?.name;
-        if (!oldName || oldName === newName) return;
-
-        if (Object.values(classes).some(c => c.name.toLowerCase() === newName.toLowerCase() && c.id !== id)) {
-            alert('এই নামের ক্লাস ஏற்கனவே আছে।');
-            return;
-        }
-
-        setClasses(prev => ({ ...prev, [id]: { ...prev[id], name: newName } }));
-
-        setStudents(prev => {
-            const updatedStudents = { ...prev };
-            Object.keys(updatedStudents).forEach(studentId => {
-                if (updatedStudents[studentId].className === oldName) {
-                    updatedStudents[studentId] = { ...updatedStudents[studentId], className: newName };
-                }
-            });
-            return updatedStudents;
-        });
-
-        setSchedules(prev => {
-            const updatedSchedules = { ...prev };
-            Object.keys(updatedSchedules).forEach(scheduleId => {
-                if (updatedSchedules[scheduleId].className === oldName) {
-                    updatedSchedules[scheduleId] = { ...updatedSchedules[scheduleId], className: newName };
-                }
-            });
-            return updatedSchedules;
-        });
-        alert('ক্লাসের নাম সফলভাবে আপডেট করা হয়েছে।');
+    
+    const backupData = () => {
+        const dataToBackup = {
+            allUsers, students, teachers, librarians, departmentHeads, classes, sections,
+            schedules, attendance, classTests, marks, mainExams, examRoutines, rooms,
+            seatPlans, invigilatorRosters, library, leaves, notices, feeInvoices,
+            studentPayments, subscription, settings
+        };
+        const dataStr = JSON.stringify(dataToBackup, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'school_data_backup.json';
+        
+        let linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
     };
-
-    const updateSection = (id: string, newName: string) => {
-        const oldName = sections[id]?.name;
-        if (!oldName || oldName === newName) return;
-
-        if (Object.values(sections).some(s => s.name.toLowerCase() === newName.toLowerCase() && s.id !== id)) {
-            alert('এই নামের বিভাগ ஏற்கனவே আছে।');
-            return;
+    
+    const restoreData = async (data: any) => {
+        // Simple validation
+        if (!data.students || !data.allUsers) {
+            throw new Error("Invalid backup file format.");
         }
-
-        setSections(prev => ({ ...prev, [id]: { ...prev[id], name: newName } }));
-
-        setStudents(prev => {
-            const updatedStudents = { ...prev };
-            Object.keys(updatedStudents).forEach(studentId => {
-                if (updatedStudents[studentId].section === oldName) {
-                    updatedStudents[studentId] = { ...updatedStudents[studentId], section: newName };
-                }
-            });
-            return updatedStudents;
-        });
-
-        setSchedules(prev => {
-            const updatedSchedules = { ...prev };
-            Object.keys(updatedSchedules).forEach(scheduleId => {
-                if (updatedSchedules[scheduleId].section === oldName) {
-                    updatedSchedules[scheduleId] = { ...updatedSchedules[scheduleId], section: newName };
-                }
-            });
-            return updatedSchedules;
-        });
-        alert('বিভাগের নাম সফলভাবে আপডেট করা হয়েছে।');
+        setAllUsers(data.allUsers);
+        setStudents(data.students);
+        setTeachers(data.teachers);
+        setLibrarians(data.librarians);
+        setDepartmentHeads(data.departmentHeads);
+        setClasses(data.classes);
+        setSections(data.sections);
+        setSchedules(data.schedules);
+        setAttendance(data.attendance);
+        setClassTests(data.classTests);
+        setMarks(data.marks);
+        setMainExams(data.mainExams);
+        setExamRoutines(data.examRoutines);
+        setRooms(data.rooms);
+        setSeatPlans(data.seatPlans);
+        setInvigilatorRosters(data.invigilatorRosters);
+        setLibrary(data.library);
+        setLeaves(data.leaves);
+        setNotices(data.notices);
+        setFeeInvoices(data.feeInvoices);
+        setStudentPayments(data.studentPayments);
+        setSubscription(data.subscription);
+        setSettings(data.settings);
     };
 
 
-    const value = {
+    const value: AppContextType = {
         user,
+        loading,
         login,
         logout,
-        settings,
         students,
         teachers,
         librarians,
-        schedules,
-        classTests,
-        marks,
+        departmentHeads,
         classes,
         sections,
-        leaves,
+        schedules,
         attendance,
-        subscription,
-        library,
+        classTests,
+        marks,
         mainExams,
+        examRoutines,
         rooms,
+        seatPlans,
         invigilatorRosters,
+        library,
+        leaves,
         notices,
         feeInvoices,
         studentPayments,
+        subscription,
+        settings,
         addStudent,
         updateStudent,
-        addTeacher,
-        updateTeacher,
-        addLibrarian,
-        updateLibrarian,
+        createNewUser,
+        updateAttendance,
         addMainExam,
-        deleteMainExam,
-        addRoom,
-        deleteRoom,
-        saveInvigilatorRoster,
-        addSchedule,
-        deleteSchedule,
+        addExamRoutine,
+        updateSeatPlan,
+        updateInvigilatorRoster,
+        addBook,
+        issueBook,
+        returnBook,
         addNotice,
         deleteNotice,
-        saveAttendance,
         addFeeInvoice,
         updateFeeInvoice,
         deleteFeeInvoice,
         recordStudentPayment,
-        addClass,
-        deleteClass,
-        addSection,
-        deleteSection,
+        addLeave,
+        updateLeave,
+        deleteLeave,
         updateSettings,
-        updateClass,
-        updateSection,
+        backupData,
+        restoreData,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-export const useApp = (): AppContextType => {
+export const useApp = () => {
     const context = useContext(AppContext);
     if (context === undefined) {
         throw new Error('useApp must be used within an AppProvider');

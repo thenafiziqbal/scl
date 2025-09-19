@@ -51,13 +51,15 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, s
                         <div className="space-y-1">
                             <label className="font-medium text-gray-700">ক্লাস</label>
                             <select name="className" value={formData.className} onChange={handleChange} required className={fieldClasses}>
-                                {Object.values(classes).map(c => <option key={c.id} value={c.name} className={optionClasses}>{c.name}</option>)}
+                                {/* FIX: Add explicit type for `c` to resolve potential property access errors. */}
+                                {Object.values(classes).map((c: Class) => <option key={c.id} value={c.name} className={optionClasses}>{c.name}</option>)}
                             </select>
                         </div>
                         <div className="space-y-1">
                             <label className="font-medium text-gray-700">বিভাগ</label>
                             <select name="section" value={formData.section} onChange={handleChange} required className={fieldClasses}>
-                                {Object.values(sections).map(s => <option key={s.id} value={s.name} className={optionClasses}>{s.name}</option>)}
+                                {/* FIX: Add explicit type for `s` to resolve potential property access errors. */}
+                                {Object.values(sections).map((s: Section) => <option key={s.id} value={s.name} className={optionClasses}>{s.name}</option>)}
                             </select>
                         </div>
                         <div className="space-y-1">
@@ -67,6 +69,10 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, s
                         <div className="space-y-1">
                             <label className="font-medium text-gray-700">যোগাযোগ</label>
                             <input type="text" name="contact" value={formData.contact} onChange={handleChange} required className={fieldClasses}/>
+                        </div>
+                         <div className="space-y-1 md:col-span-2">
+                            <label className="font-medium text-gray-700">অভিভাবকের ইমেইল</label>
+                            <input type="email" name="guardianEmail" value={formData.guardianEmail || ''} onChange={handleChange} className={fieldClasses}/>
                         </div>
                         <div className="space-y-1 md:col-span-2">
                             <label className="font-medium text-gray-700">প্রোফাইল ছবির URL</label>
