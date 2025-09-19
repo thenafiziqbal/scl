@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import IDCardModal from '../components/IDCardModal';
-import { noto_sans_bengali_normal } from '../services/bengaliFont';
-
-declare global {
-    interface Window {
-        jspdf: any;
-    }
-}
+import { exportHtmlToWord } from '../services/wordExporter';
 
 const StudentProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -55,66 +49,64 @@ const StudentProfile: React.FC = () => {
         return 'F';
     };
     
-    const generateTranscript = () => {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            alert("PDF generation library not loaded.");
-            return;
-        }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Add Bengali font
-        doc.addFileToVFS('NotoSansBengali-Regular.ttf', noto_sans_bengali_normal);
-        doc.addFont('NotoSansBengali-Regular.ttf', 'NotoSansBengali', 'normal');
-        doc.setFont('NotoSansBengali');
-
-        // Header
-        doc.setFontSize(18);
-        doc.text(settings.schoolName, doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
-        doc.setFontSize(14);
-        doc.text('একাডেমিক ট্রান্সক্রিপ্ট', doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
-        
-        // Student Info
-        doc.setFontSize(12);
-        doc.text(`ছাত্রের নাম: ${student.name}`, 14, 45);
-        doc.text(`ক্লাস: ${student.className} (${student.section})`, 14, 52);
-        doc.text(`রোল: ${student.roll}`, 14, 59);
-        
-        // Marks Table
-        const tableData = studentMarks.map(mark => {
+    const generateTranscriptWord = () => {
+        let marksHtml = `
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>পরীক্ষার নাম</th>
+                        <th>বিষয়</th>
+                        <th>মোট নম্বর</th>
+                        <th>প্রাপ্ত নম্বর</th>
+                        <th>শতাংশ</th>
+                        <th>গ্রেড</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        studentMarks.forEach(mark => {
             if (mark) {
                 const percentage = (mark.marksObtained / mark.totalMarks) * 100;
-                return [
-                    mark.examName,
-                    mark.subject,
-                    mark.totalMarks,
-                    mark.marksObtained,
-                    `${percentage.toFixed(2)}%`,
-                    getGrade(percentage),
-                ];
+                marksHtml += `
+                    <tr>
+                        <td>${mark.examName}</td>
+                        <td>${mark.subject}</td>
+                        <td style="text-align: center;">${mark.totalMarks}</td>
+                        <td style="text-align: center;">${mark.marksObtained}</td>
+                        <td style="text-align: center;">${percentage.toFixed(2)}%</td>
+                        <td style="text-align: center;">${getGrade(percentage)}</td>
+                    </tr>
+                `;
             }
-            return [];
-        }).filter(row => row.length > 0);
-        
-        doc.autoTable({
-            head: [['পরীক্ষার নাম', 'বিষয়', 'মোট নম্বর', 'প্রাপ্ত নম্বর', 'শতাংশ', 'গ্রেড']],
-            body: tableData,
-            startY: 70,
-            theme: 'grid',
-            styles: { font: 'NotoSansBengali' },
-            headStyles: { font: 'NotoSansBengali', fontStyle: 'bold', fillColor: [44, 62, 80] },
         });
+        marksHtml += `</tbody></table>`;
         
-        // Footer
-        const finalY = (doc as any).lastAutoTable.finalY || 150;
-        if(settings.principalSignatureUrl && settings.principalName) {
-            doc.addImage(settings.principalSignatureUrl, 'PNG', 150, finalY + 10, 40, 15);
-            doc.line(150, finalY + 26, 190, finalY + 26);
-            doc.text(settings.principalName, 152, finalY + 32);
-            doc.text('অধ্যক্ষ', 165, finalY + 38);
-        }
-        
-        doc.save(`${student.name}_ট্রান্সক্রিপ্ট.pdf`);
+        const signatureHtml = `
+            <div style="float: right; text-align: center; margin-top: 60px;">
+                <p>_________________________</p>
+                <p>${settings.principalName || ''}</p>
+                <p><strong>অধ্যক্ষ</strong></p>
+            </div>
+        `;
+
+        const htmlString = `
+            <div>
+                <div style="text-align: center;">
+                    <h1>${settings.schoolName}</h1>
+                    <h2>একাডেমিক ট্রান্সক্রিপ্ট</h2>
+                </div>
+                <br/>
+                <p><strong>ছাত্রের নাম:</strong> ${student.name}</p>
+                <p><strong>ক্লাস:</strong> ${student.className} (${student.section})</p>
+                <p><strong>রোল:</strong> ${student.roll}</p>
+                <br/>
+                ${marksHtml}
+                <br/>
+                ${signatureHtml}
+            </div>
+        `;
+
+        exportHtmlToWord(htmlString, `${student.name}_ট্রান্সক্রিপ্ট`);
     };
 
 
@@ -138,8 +130,8 @@ const StudentProfile: React.FC = () => {
                     <button onClick={() => setIdCardStudent(student)} className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition flex items-center gap-2">
                         <i className="fas fa-id-card"></i> আইডি কার্ড
                     </button>
-                    <button onClick={generateTranscript} className="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition flex items-center gap-2">
-                        <i className="fas fa-file-pdf"></i> একাডেমিক ট্রান্সক্রিপ্ট
+                    <button onClick={generateTranscriptWord} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                        <i className="fas fa-file-word"></i> ট্রান্সক্রিপ্ট (Word)
                     </button>
                 </div>
             </div>

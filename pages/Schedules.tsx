@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { noto_sans_bengali_normal } from '../services/bengaliFont';
-
-declare global {
-    interface Window {
-        jspdf: any;
-    }
-}
+import { exportHtmlToWord } from '../services/wordExporter';
 
 const Schedules: React.FC = () => {
     const { schedules, teachers, user, settings, classes, sections, addSchedule, deleteSchedule } = useApp();
@@ -46,52 +40,46 @@ const Schedules: React.FC = () => {
         }
     };
 
-    const generateClassicPdf = () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Add Bengali font
-        doc.addFileToVFS('NotoSansBengali-Regular.ttf', noto_sans_bengali_normal);
-        doc.addFont('NotoSansBengali-Regular.ttf', 'NotoSansBengali', 'normal');
-        doc.setFont('NotoSansBengali');
-
+    const generateClassicWord = () => {
         const schoolName = settings?.schoolName || 'স্কুলের নাম';
         const title = "সাপ্তাহিক ক্লাস রুটিন";
         
-        doc.setFontSize(18);
-        doc.text(schoolName, doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
-        doc.setFontSize(14);
-        doc.text(title, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
-
-        const head = [['সময়', ...days]];
+        let scheduleHtml = `
+            <div style="text-align: center;">
+                <h1>${schoolName}</h1>
+                <h2>${title}</h2>
+            </div>
+            <br/>
+            <table border="1" style="text-align: center;">
+                <thead>
+                    <tr>
+                        <th>সময়</th>
+                        ${days.map(day => `<th>${day}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+    
         const allSchedules = Object.values(schedules);
-        
         const timeSlots = [...new Set(allSchedules.map(s => `${s.startTime} - ${s.endTime}`))].sort();
-
-        const body = timeSlots.map(slot => {
-            const row = [slot];
+    
+        timeSlots.forEach(slot => {
+            scheduleHtml += `<tr><td>${slot}</td>`;
             for (let i = 0; i < days.length; i++) {
                 const scheduleForSlotAndDay = allSchedules.find(s => `${s.startTime} - ${s.endTime}` === slot && parseInt(s.day) === i);
                 if (scheduleForSlotAndDay) {
                     const teacherName = teachers[scheduleForSlotAndDay.teacherId]?.name || 'N/A';
-                    row.push(`${scheduleForSlotAndDay.subject}\n${teacherName}\n(${scheduleForSlotAndDay.className})`);
+                    scheduleHtml += `<td>${scheduleForSlotAndDay.subject}<br/>${teacherName}<br/>(${scheduleForSlotAndDay.className})</td>`;
                 } else {
-                    row.push('');
+                    scheduleHtml += `<td></td>`;
                 }
             }
-            return row;
+            scheduleHtml += `</tr>`;
         });
-
-        doc.autoTable({
-            head: head,
-            body: body,
-            startY: 40,
-            theme: 'grid',
-            styles: { halign: 'center', valign: 'middle', font: 'NotoSansBengali' },
-            headStyles: { font: 'NotoSansBengali', fontStyle: 'bold', fillColor: [44, 62, 80], textColor: 255 },
-        });
-
-        doc.save(`ক্লাস-রুটিন.pdf`);
+    
+        scheduleHtml += `</tbody></table>`;
+    
+        exportHtmlToWord(scheduleHtml, `ক্লাস-রুটিন`);
     };
 
     return (
@@ -152,10 +140,10 @@ const Schedules: React.FC = () => {
                 <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
                     <h2 className="text-xl font-bold text-primary">সাপ্তাহিক ক্লাস রুটিন</h2>
                     <button 
-                        onClick={generateClassicPdf}
-                        className="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition text-sm"
+                        onClick={generateClassicWord}
+                        className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm"
                     >
-                        <i className="fas fa-file-pdf mr-2"></i> ক্লাসিক PDF ডাউনলোড
+                        <i className="fas fa-file-word mr-2"></i> Word ডাউনলোড
                     </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

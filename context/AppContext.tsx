@@ -45,6 +45,13 @@ interface AppContextType {
     updateFeeInvoice: (invoiceId: string, updatedData: Partial<FeeInvoice>) => void;
     deleteFeeInvoice: (id: string) => void;
     recordStudentPayment: (payment: Omit<StudentPayment, 'id'>) => void;
+    addClass: (name: string) => void;
+    deleteClass: (id: string) => void;
+    addSection: (name: string) => void;
+    deleteSection: (id: string) => void;
+    updateSettings: (newSettings: SchoolSettings) => void;
+    updateClass: (id: string, newName: string) => void;
+    updateSection: (id: string, newName: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -241,6 +248,119 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setStudentPayments(prev => ({ ...prev, [newId]: newPayment }));
     };
 
+    const addClass = (name: string) => {
+        if (!name.trim()) return;
+        const newId = `c${Date.now()}`;
+        const newClass: Class = { id: newId, name: name.trim() };
+        setClasses(prev => ({ ...prev, [newId]: newClass }));
+    };
+
+    const deleteClass = (id: string) => {
+        const isUsed = Object.values(students).some(s => s.className === classes[id]?.name) || 
+                       Object.values(schedules).some(s => s.className === classes[id]?.name);
+        if (isUsed) {
+            alert('এই ক্লাসটি ছাত্র বা শিডিউলে ব্যবহৃত হচ্ছে, তাই মুছে ফেলা যাবে না।');
+            return;
+        }
+        setClasses(prev => {
+            const newState = { ...prev };
+            delete newState[id];
+            return newState;
+        });
+    };
+
+    const addSection = (name: string) => {
+        if (!name.trim()) return;
+        const newId = `s${Date.now()}`;
+        const newSection: Section = { id: newId, name: name.trim() };
+        setSections(prev => ({ ...prev, [newId]: newSection }));
+    };
+
+    const deleteSection = (id: string) => {
+        const isUsed = Object.values(students).some(s => s.section === sections[id]?.name) || 
+                       Object.values(schedules).some(s => s.section === sections[id]?.name);
+        if (isUsed) {
+            alert('এই বিভাগটি ছাত্র বা শিডিউলে ব্যবহৃত হচ্ছে, তাই মুছে ফেলা যাবে না।');
+            return;
+        }
+        setSections(prev => {
+            const newState = { ...prev };
+            delete newState[id];
+            return newState;
+        });
+    };
+    
+    const updateSettings = (newSettings: SchoolSettings) => {
+        setSettings(newSettings);
+    };
+
+    const updateClass = (id: string, newName: string) => {
+        const oldName = classes[id]?.name;
+        if (!oldName || oldName === newName) return;
+
+        if (Object.values(classes).some(c => c.name.toLowerCase() === newName.toLowerCase() && c.id !== id)) {
+            alert('এই নামের ক্লাস ஏற்கனவே আছে।');
+            return;
+        }
+
+        setClasses(prev => ({ ...prev, [id]: { ...prev[id], name: newName } }));
+
+        setStudents(prev => {
+            const updatedStudents = { ...prev };
+            Object.keys(updatedStudents).forEach(studentId => {
+                if (updatedStudents[studentId].className === oldName) {
+                    updatedStudents[studentId] = { ...updatedStudents[studentId], className: newName };
+                }
+            });
+            return updatedStudents;
+        });
+
+        setSchedules(prev => {
+            const updatedSchedules = { ...prev };
+            Object.keys(updatedSchedules).forEach(scheduleId => {
+                if (updatedSchedules[scheduleId].className === oldName) {
+                    updatedSchedules[scheduleId] = { ...updatedSchedules[scheduleId], className: newName };
+                }
+            });
+            return updatedSchedules;
+        });
+        alert('ক্লাসের নাম সফলভাবে আপডেট করা হয়েছে।');
+    };
+
+    const updateSection = (id: string, newName: string) => {
+        const oldName = sections[id]?.name;
+        if (!oldName || oldName === newName) return;
+
+        if (Object.values(sections).some(s => s.name.toLowerCase() === newName.toLowerCase() && s.id !== id)) {
+            alert('এই নামের বিভাগ ஏற்கனவே আছে।');
+            return;
+        }
+
+        setSections(prev => ({ ...prev, [id]: { ...prev[id], name: newName } }));
+
+        setStudents(prev => {
+            const updatedStudents = { ...prev };
+            Object.keys(updatedStudents).forEach(studentId => {
+                if (updatedStudents[studentId].section === oldName) {
+                    updatedStudents[studentId] = { ...updatedStudents[studentId], section: newName };
+                }
+            });
+            return updatedStudents;
+        });
+
+        setSchedules(prev => {
+            const updatedSchedules = { ...prev };
+            Object.keys(updatedSchedules).forEach(scheduleId => {
+                if (updatedSchedules[scheduleId].section === oldName) {
+                    updatedSchedules[scheduleId] = { ...updatedSchedules[scheduleId], section: newName };
+                }
+            });
+            return updatedSchedules;
+        });
+        alert('বিভাগের নাম সফলভাবে আপডেট করা হয়েছে।');
+    };
+
+
     const value = {
         user,
         login,
@@ -284,6 +404,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateFeeInvoice,
         deleteFeeInvoice,
         recordStudentPayment,
+        addClass,
+        deleteClass,
+        addSection,
+        deleteSection,
+        updateSettings,
+        updateClass,
+        updateSection,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

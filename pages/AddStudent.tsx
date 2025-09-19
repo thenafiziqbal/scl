@@ -66,9 +66,9 @@ const AddStudent: React.FC = () => {
                         <label htmlFor="className" className="font-semibold text-gray-600">ক্লাস</label>
                         <div className={inputWrapperClass}>
                              <i className={`${iconClass} fa-school`}></i>
-                            <select id="className" name="className" value={formData.className} onChange={handleChange} required className={`${inputClass} appearance-none`}>
+                            <select id="className" name="className" value={formData.className} onChange={handleChange} required className={`${inputClass} appearance-none text-gray-700`}>
                                 <option value="">একটি ক্লাস নির্বাচন করুন</option>
-                                {Object.values(classes).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                {Object.values(classes).map(c => <option key={c.id} value={c.name} className="text-gray-900">{c.name}</option>)}
                             </select>
                              <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
@@ -78,9 +78,9 @@ const AddStudent: React.FC = () => {
                         <label htmlFor="section" className="font-semibold text-gray-600">বিভাগ</label>
                         <div className={inputWrapperClass}>
                              <i className={`${iconClass} fa-chalkboard`}></i>
-                            <select id="section" name="section" value={formData.section} onChange={handleChange} required className={`${inputClass} appearance-none`}>
+                            <select id="section" name="section" value={formData.section} onChange={handleChange} required className={`${inputClass} appearance-none text-gray-700`}>
                                 <option value="">একটি বিভাগ নির্বাচন করুন</option>
-                                {Object.values(sections).map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                                {Object.values(sections).map(s => <option key={s.id} value={s.name} className="text-gray-900">{s.name}</option>)}
                             </select>
                             <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>

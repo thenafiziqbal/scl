@@ -28,7 +28,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({ staff, onClose, onSave,
         onSave(formData);
     };
 
-    const fieldClasses = "w-full p-2 border border-gray-600 rounded-md shadow-sm bg-accent text-light focus:ring-secondary focus:border-secondary";
+    const fieldClasses = "w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-800 focus:ring-secondary focus:border-secondary";
     const optionClasses = "bg-white text-gray-800";
 
     return (

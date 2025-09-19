@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { noto_sans_bengali_normal } from '../services/bengaliFont';
+import { exportHtmlToWord } from '../services/wordExporter';
 import EditInvoiceModal from '../components/EditInvoiceModal';
 import { FeeInvoice } from '../types';
-
-
-declare global {
-    interface Window {
-        jspdf: any;
-    }
-}
 
 const FeesManagement: React.FC = () => {
     const { 
@@ -19,7 +12,8 @@ const FeesManagement: React.FC = () => {
         addFeeInvoice, 
         recordStudentPayment,
         updateFeeInvoice,
-        deleteFeeInvoice
+        deleteFeeInvoice,
+        settings
     } = useApp();
     
     const [activeTab, setActiveTab] = useState('invoices');
@@ -87,39 +81,40 @@ const FeesManagement: React.FC = () => {
     };
 
 
-    const generatePaymentsPDF = () => {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            alert("PDF generation library not loaded.");
-            return;
-        }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Add Bengali font
-        doc.addFileToVFS('NotoSansBengali-Regular.ttf', noto_sans_bengali_normal);
-        doc.addFont('NotoSansBengali-Regular.ttf', 'NotoSansBengali', 'normal');
-        doc.setFont('NotoSansBengali');
-
-        doc.setFontSize(18);
-        doc.text('সকল পেমেন্টের তালিকা', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
-
-        const tableData = Object.values(studentPayments).map(payment => [
-            students[payment.studentId]?.name || 'N/A',
-            feeInvoices[payment.invoiceId]?.name || 'N/A',
-            payment.amountPaid.toFixed(2),
-            payment.paymentDate,
-        ]);
-
-        doc.autoTable({
-            head: [['ছাত্রের নাম', 'ইনভয়েস', 'পরিমাণ (৳)', 'তারিখ']],
-            body: tableData,
-            startY: 30,
-            theme: 'grid',
-            styles: { font: 'NotoSansBengali' },
-            headStyles: { font: 'NotoSansBengali', fontStyle: 'bold', fillColor: [22, 160, 133] },
-        });
-
-        doc.save('পেমেন্ট-রেকর্ড.pdf');
+    const generatePaymentsWord = () => {
+        const tableData = Object.values(studentPayments).map(payment => `
+            <tr>
+                <td>${students[payment.studentId]?.name || 'N/A'}</td>
+                <td>${feeInvoices[payment.invoiceId]?.name || 'N/A'}</td>
+                <td style="text-align: right;">${payment.amountPaid.toFixed(2)}</td>
+                <td style="text-align: center;">${payment.paymentDate}</td>
+            </tr>
+        `).join('');
+        
+        const htmlString = `
+            <div>
+                <div style="text-align: center;">
+                    <h1>${settings.schoolName}</h1>
+                    <h2>সকল পেমেন্টের তালিকা</h2>
+                </div>
+                <br/>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>ছাত্রের নাম</th>
+                            <th>ইনভয়েস</th>
+                            <th>পরিমাণ (৳)</th>
+                            <th>তারিখ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableData}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        exportHtmlToWord(htmlString, 'পেমেন্ট-রেকর্ড');
     };
 
     const tabs = [
@@ -214,8 +209,8 @@ const FeesManagement: React.FC = () => {
                  <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
                     <h3 className="text-lg font-bold text-accent">সকল পেমেন্টের তালিকা</h3>
                     <div className="flex items-center space-x-2">
-                        <button onClick={generatePaymentsPDF} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm">
-                            <i className="fas fa-file-pdf mr-2"></i> PDF ডাউনলোড
+                        <button onClick={generatePaymentsWord} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm">
+                            <i className="fas fa-file-word mr-2"></i> Word ডাউনলোড
                         </button>
                     </div>
                 </div>

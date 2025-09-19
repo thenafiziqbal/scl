@@ -26,9 +26,9 @@ const EditStudentModal: React.FC<EditStudentModalProps> = ({ student, classes, s
         onSave(formData);
     };
 
-    // Consistent dark theme for form fields
-    const fieldClasses = "w-full p-2 border border-gray-600 rounded-md shadow-sm bg-accent text-light focus:ring-secondary focus:border-secondary";
-    // For select options, ensure they are readable
+    // Light theme for form fields for better readability and consistency
+    const fieldClasses = "w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-800 focus:ring-secondary focus:border-secondary";
+    // Options for select dropdown
     const optionClasses = "bg-white text-gray-800";
 
     return (
