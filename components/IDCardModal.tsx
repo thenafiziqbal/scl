@@ -37,7 +37,7 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ student, settings, onClose })
                         <td style="vertical-align: top; padding: 0; border: none; text-align: center;">
                             <div style="margin-top: 12px;">
                               <img 
-                                src="${student.profilePicUrl || 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png'}" 
+                                src="${student.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random&color=fff&size=128`}" 
                                 alt="${student.name}" 
                                 style="width: 112px; height: 128px; object-fit: cover; border: 4px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 6px; margin: 0 auto;"
                               />
@@ -108,10 +108,15 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ student, settings, onClose })
                         {/* Photo */}
                         <div className="flex justify-center my-3">
                              <img 
-                                src={student.profilePicUrl} 
+                                src={student.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random&color=fff&size=112`} 
                                 alt={student.name} 
                                 className="w-28 h-32 object-cover border-4 border-white shadow-md rounded-md"
-                                onError={(e) => (e.currentTarget.src = 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png')}
+                                onError={(e) => {
+                                    const fallbackSrc = 'https://placehold.co/112x128/CCCCCC/FFFFFF?text=Photo';
+                                    if (e.currentTarget.src !== fallbackSrc) {
+                                        e.currentTarget.src = fallbackSrc;
+                                    }
+                                }}
                                 crossOrigin="anonymous"
                              />
                         </div>

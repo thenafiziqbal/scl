@@ -1,11 +1,13 @@
 
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
 
 interface ProtectedRouteProps {
-    children: JSX.Element;
+    // FIX: Changed JSX.Element to React.ReactElement for better type safety.
+    children: React.ReactElement;
     roles: UserRole[];
     isPremium?: boolean;
 }

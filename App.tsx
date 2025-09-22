@@ -1,5 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+// FIX: Correctly import AppProvider and useApp from the fixed AppContext
 import { AppProvider, useApp } from './context/AppContext';
 
 import MainLayout from './components/MainLayout';

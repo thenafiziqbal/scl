@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { SchoolSettings, Class, Section } from '../types';
@@ -121,6 +122,7 @@ const Settings: React.FC = () => {
                     <div>
                         <h3 className="text-lg font-semibold text-accent mb-3">ক্লাসসমূহ</h3>
                         <div className="space-y-2">
+                           {/* FIX: Add explicit type for `c` to resolve property access errors. */}
                            {Object.values(classes).map((c: Class) => (
                                <div key={c.id} className="flex justify-between items-center bg-light p-2 rounded-md">
                                    <span>{c.name}</span>
@@ -136,6 +138,7 @@ const Settings: React.FC = () => {
                     <div>
                         <h3 className="text-lg font-semibold text-accent mb-3">বিভাগসমূহ</h3>
                         <div className="space-y-2">
+                           {/* FIX: Add explicit type for `s` to resolve property access errors. */}
                            {Object.values(sections).map((s: Section) => (
                                <div key={s.id} className="flex justify-between items-center bg-light p-2 rounded-md">
                                    <span>{s.name}</span>

@@ -1,10 +1,11 @@
+
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Schedule, Class, Teacher } from '../types';
 
 const Schedules: React.FC = () => {
     const { schedules, classes, teachers, user } = useApp();
-    const [selectedClass, setSelectedClass] = useState(Object.values(classes)[0]?.name || '');
+    const [selectedClass, setSelectedClass] = useState((Object.values(classes)[0] as Class)?.name || '');
 
     const days = ["শনিবার", "রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার"];
 

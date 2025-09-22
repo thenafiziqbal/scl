@@ -15,23 +15,23 @@ export const mockUsers: { [uid: string]: User & {department?: string} } = {
 };
 
 export const mockStudents: { [id: string]: Student } = {
-    'stu1': { id: 'stu1', name: 'আকাশ আহমেদ', roll: 1, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'নুর আহমেদ', contact: '01712345678', guardianEmail: 'guardian1@email.com', profilePicUrl: 'https://i.pravatar.cc/150?u=stu1' },
-    'stu2': { id: 'stu2', name: 'বাতাসি খাতুন', roll: 2, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'আলী খাতুন', contact: '01812345678', guardianEmail: 'guardian2@email.com', profilePicUrl: 'https://i.pravatar.cc/150?u=stu2' },
-    'stu3': { id: 'stu3', name: 'মেঘলা চৌধুরী', roll: 1, className: 'নবম শ্রেণী', section: 'খ', guardianName: 'রহমান চৌধুরী', contact: '01912345678', profilePicUrl: 'https://i.pravatar.cc/150?u=stu3' },
-    'stu4': { id: 'stu4', name: 'সাগর ইসলাম', roll: 3, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'শফিক ইসলাম', contact: '01612345678', profilePicUrl: 'https://i.pravatar.cc/150?u=stu4' },
+    'stu1': { id: 'stu1', name: 'আকাশ আহমেদ', roll: 1, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'নুর আহমেদ', contact: '01712345678', guardianEmail: 'guardian1@email.com', profilePicUrl: 'https://ui-avatars.com/api/?name=আকাশ+আহমেদ&background=random&color=fff' },
+    'stu2': { id: 'stu2', name: 'বাতাসি খাতুন', roll: 2, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'আলী খাতুন', contact: '01812345678', guardianEmail: 'guardian2@email.com', profilePicUrl: 'https://ui-avatars.com/api/?name=বাতাসি+খাতুন&background=random&color=fff' },
+    'stu3': { id: 'stu3', name: 'মেঘলা চৌধুরী', roll: 1, className: 'নবম শ্রেণী', section: 'খ', guardianName: 'রহমান চৌধুরী', contact: '01912345678', profilePicUrl: 'https://ui-avatars.com/api/?name=মেঘলা+চৌধুরী&background=random&color=fff' },
+    'stu4': { id: 'stu4', name: 'সাগর ইসলাম', roll: 3, className: 'দশম শ্রেণী', section: 'ক', guardianName: 'শফিক ইসলাম', contact: '01612345678', profilePicUrl: 'https://ui-avatars.com/api/?name=সাগর+ইসলাম&background=random&color=fff' },
 };
 
 export const mockTeachers: { [id: string]: TeacherWithUser } = {
-    'tech1': { id: 'tech1', uid: 'user2', role: 'teacher', name: 'মোঃ রফিক', subject: 'গণিত', phone: '01777777777', email: 'teacher@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=tech1', department: 'বিজ্ঞান বিভাগ' },
-    'tech2': { id: 'tech2', uid: 'user6', role: 'teacher', name: 'আরিফুল ইসলাম', subject: 'বাংলা', phone: '01888888888', email: 'teacher2@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=tech2', department: 'কলা বিভাগ' },
+    'tech1': { id: 'tech1', uid: 'user2', role: 'teacher', name: 'মোঃ রফিক', subject: 'গণিত', phone: '01777777777', email: 'teacher@school.com', profilePicUrl: 'https://ui-avatars.com/api/?name=মোঃ+রফিক&background=random&color=fff', department: 'বিজ্ঞান বিভাগ' },
+    'tech2': { id: 'tech2', uid: 'user6', role: 'teacher', name: 'আরিফুল ইসলাম', subject: 'বাংলা', phone: '01888888888', email: 'teacher2@school.com', profilePicUrl: 'https://ui-avatars.com/api/?name=আরিফুল+ইসলাম&background=random&color=fff', department: 'কলা বিভাগ' },
 };
 
 export const mockLibrarians: { [id: string]: LibrarianWithUser } = {
-    'lib1': { id: 'lib1', uid: 'user3', role: 'librarian', name: 'শাহানা বেগম', phone: '01999999999', email: 'librarian@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=lib1' },
+    'lib1': { id: 'lib1', uid: 'user3', role: 'librarian', name: 'শাহানা বেগম', phone: '01999999999', email: 'librarian@school.com', profilePicUrl: 'https://ui-avatars.com/api/?name=শাহানা+বেগম&background=random&color=fff' },
 };
 
 export const mockDepartmentHeads: { [id: string]: DepartmentHeadWithUser } = {
-    'head1': { id: 'head1', uid: 'user4', role: 'department-head', name: 'ডঃ আনোয়ার হোসেন', department: 'বিজ্ঞান বিভাগ', phone: '01555555555', email: 'head@school.com', profilePicUrl: 'https://i.pravatar.cc/150?u=head1' },
+    'head1': { id: 'head1', uid: 'user4', role: 'department-head', name: 'ডঃ আনোয়ার হোসেন', department: 'বিজ্ঞান বিভাগ', phone: '01555555555', email: 'head@school.com', profilePicUrl: 'https://ui-avatars.com/api/?name=আনোয়ার+হোসেন&background=random&color=fff' },
 };
 
 export const mockClasses: { [id: string]: Class } = {
@@ -120,9 +120,9 @@ export const mockSubscription: Subscription = {
 
 export const mockSettings: SchoolSettings = {
     schoolName: 'আমার আদর্শ স্কুল',
-    schoolLogoUrl: 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png',
+    schoolLogoUrl: 'https://placehold.co/100x100/4f46e5/white?text=%E0%A6%B2%E0%A7%8B%E0%A6%97%E0%A7%8B',
     principalName: 'মোঃ আব্দুল্লাহ',
-    principalSignatureUrl: 'https://i.ibb.co/7zJ2S5b/signature-placeholder.png',
+    principalSignatureUrl: 'https://placehold.co/150x50/000000/FFFFFF?text=%E0%A6%B8%E0%A7%8D%E0%A6%AC%E0%A6%BE%E0%A6%95%E0%A7%8D%E0%A6%B7%E0%A6%B0',
     premiumFeatures: {
         examManagement: true,
     }

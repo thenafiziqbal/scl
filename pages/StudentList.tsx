@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -47,10 +48,15 @@ const StudentList: React.FC = () => {
                                 <tr key={student.id} className="border-b">
                                     <td className="p-4">
                                         <img 
-                                            src={student.profilePicUrl || 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png'} 
+                                            src={student.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random&color=fff`} 
                                             alt={student.name} 
                                             className="w-12 h-12 rounded-full object-cover"
-                                            onError={(e) => (e.currentTarget.src = 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png')}
+                                            onError={(e) => {
+                                                const fallbackSrc = 'https://placehold.co/48x48/CCCCCC/FFFFFF?text=Photo';
+                                                if (e.currentTarget.src !== fallbackSrc) {
+                                                    e.currentTarget.src = fallbackSrc;
+                                                }
+                                            }}
                                         />
                                     </td>
                                     <td className="p-4 font-medium text-accent">{student.name}</td>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StudentLeave, Student } from '../types';
@@ -70,6 +71,7 @@ const StudentLeaves: React.FC = () => {
                                 <label className="font-medium text-sm">ছাত্র</label>
                                 <select value={studentId} onChange={e => setStudentId(e.target.value)} required className={fieldClasses}>
                                     <option value="">-- ছাত্র নির্বাচন করুন --</option>
+                                    {/* FIX: Add explicit type for `s` to resolve property access errors. */}
                                     {Object.values(students).map((s: Student) => <option key={s.id} value={s.id}>{s.name} ({s.className})</option>)}
                                 </select>
                             </div>
@@ -106,6 +108,7 @@ const StudentLeaves: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
+                                {/* FIX: Add explicit type for `leave` to resolve property access errors. */}
                                 {Object.values(leaves).map((leave: StudentLeave) => {
                                     const student = students[leave.studentId];
                                     return (

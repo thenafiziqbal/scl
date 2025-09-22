@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -10,8 +11,10 @@ const AddStudent: React.FC = () => {
     const [formData, setFormData] = useState<Omit<Student, 'id'>>({
         name: '',
         roll: 0,
-        className: Object.values(classes)[0]?.name || '',
-        section: Object.values(sections)[0]?.name || '',
+        // FIX: Add explicit type assertion to safely access property 'name'.
+        className: (Object.values(classes)[0] as Class)?.name || '',
+        // FIX: Add explicit type assertion to safely access property 'name'.
+        section: (Object.values(sections)[0] as Section)?.name || '',
         guardianName: '',
         contact: '',
         guardianEmail: '',

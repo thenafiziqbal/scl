@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { MainExam, Student, Class, Section } from '../types';
@@ -11,8 +12,8 @@ interface AdmitCardModalProps {
 
 const AdmitCardModal: React.FC<AdmitCardModalProps> = ({ exam, onClose }) => {
     const { settings, students, classes, sections } = useApp();
-    const [selectedClass, setSelectedClass] = useState(Object.values(classes)[0]?.name || '');
-    const [selectedSection, setSelectedSection] = useState(Object.values(sections)[0]?.name || '');
+    const [selectedClass, setSelectedClass] = useState((Object.values(classes)[0] as Class)?.name || '');
+    const [selectedSection, setSelectedSection] = useState((Object.values(sections)[0] as Section)?.name || '');
 
     const studentsInClass = useMemo(() => {
         // FIX: Add explicit types to resolve property access and sort errors.
@@ -92,10 +93,15 @@ const AdmitCardModal: React.FC<AdmitCardModalProps> = ({ exam, onClose }) => {
                                 {/* Body */}
                                 <div className="flex my-3 gap-3">
                                     <img 
-                                        src={student.profilePicUrl} 
+                                        src={student.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random&color=fff&size=80`}
                                         alt={student.name} 
                                         className="w-20 h-24 object-cover border-2 border-gray-300"
-                                        onError={(e) => (e.currentTarget.src = 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png')}
+                                        onError={(e) => {
+                                            const fallbackSrc = 'https://placehold.co/80x96/CCCCCC/FFFFFF?text=Photo';
+                                            if (e.currentTarget.src !== fallbackSrc) {
+                                                e.currentTarget.src = fallbackSrc;
+                                            }
+                                        }}
                                      />
                                      <div className="text-sm">
                                         <p><strong>নাম:</strong> {student.name}</p>

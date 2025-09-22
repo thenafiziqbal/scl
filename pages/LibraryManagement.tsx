@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Book, IssuedBook, Student } from '../types';
+import EditBookModal from '../components/EditBookModal';
 
 const LibraryManagement: React.FC = () => {
     const [activeTab, setActiveTab] = useState('manage-books');
-    const { library, addBook, issueBook, returnBook, students } = useApp();
+    const { library, addBook, issueBook, returnBook, students, updateBook, deleteBook } = useApp();
 
     // State for new book form
     const [title, setTitle] = useState('');
@@ -15,6 +17,9 @@ const LibraryManagement: React.FC = () => {
     const [studentId, setStudentId] = useState('');
     const [bookId, setBookId] = useState('');
     const [dueDate, setDueDate] = useState('');
+
+    // State for editing book
+    const [editingBook, setEditingBook] = useState<Book | null>(null);
 
     // State for filtering issued books by student
     const [filterStudentId, setFilterStudentId] = useState<string>('');
@@ -48,6 +53,19 @@ const LibraryManagement: React.FC = () => {
         setStudentId('');
         setBookId('');
         setDueDate('');
+    };
+    
+    const handleSaveBook = (updatedBook: Book) => {
+        updateBook(updatedBook.id, updatedBook);
+        setEditingBook(null);
+        alert('বইয়ের তথ্য সফলভাবে আপডেট করা হয়েছে!');
+    };
+    
+    const handleDeleteBook = (bookId: string) => {
+        const bookTitle = library.books[bookId]?.title || 'এই বইটি';
+        if (window.confirm(`আপনি কি "${bookTitle}" বইটি লাইব্রেরি থেকে মুছে ফেলতে চান?`)) {
+            deleteBook(bookId);
+        }
     };
 
     const handleReturnBook = (issueId: string, bookId: string) => {
@@ -84,7 +102,7 @@ const LibraryManagement: React.FC = () => {
             </div>
             <div className="lg:col-span-2">
                 <h3 className="text-lg font-bold text-primary mb-4">লাইব্রেরির সকল বই</h3>
-                <div className="overflow-x-auto max-h-[60vh]">
+                <div className="overflow-y-auto max-h-[60vh]">
                     <table className="w-full text-left">
                         <thead className="bg-sidebar text-white sticky top-0">
                             <tr>
@@ -102,7 +120,12 @@ const LibraryManagement: React.FC = () => {
                                     <td className="p-3 text-gray-700">{book.author}</td>
                                     <td className="p-3 text-gray-700 text-center">{book.totalQuantity}</td>
                                     <td className="p-3 text-gray-700 text-center">{book.availableQuantity}</td>
-                                    <td className="p-3 text-center"><button className="text-danger hover:text-red-700"><i className="fas fa-trash"></i></button></td>
+                                    <td className="p-3 text-center">
+                                        <div className="flex justify-center items-center space-x-3">
+                                            <button onClick={() => setEditingBook(book)} className="text-amber-600 hover:text-amber-800" title="এডিট করুন"><i className="fas fa-edit"></i></button>
+                                            <button onClick={() => handleDeleteBook(book.id)} className="text-danger hover:text-red-700" title="মুছে ফেলুন"><i className="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -175,7 +198,7 @@ const LibraryManagement: React.FC = () => {
                             </select>
                         </div>
                     </div>
-                     <div className="overflow-x-auto max-h-[60vh]">
+                     <div className="overflow-y-auto max-h-[60vh]">
                         <table className="w-full text-left">
                             <thead className="bg-sidebar text-white sticky top-0">
                                 <tr>
@@ -227,29 +250,38 @@ const LibraryManagement: React.FC = () => {
     };
     
     return (
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-            <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-6">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === tab.id
-                                    ? 'border-secondary text-secondary'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </nav>
+        <>
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-6 overflow-x-auto">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === tab.id
+                                        ? 'border-secondary text-secondary'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+                <div className="py-6">
+                    {activeTab === 'manage-books' && renderBookManagement()}
+                    {activeTab === 'issue-return' && renderIssueReturn()}
+                </div>
             </div>
-            <div className="py-6">
-                {activeTab === 'manage-books' && renderBookManagement()}
-                {activeTab === 'issue-return' && renderIssueReturn()}
-            </div>
-        </div>
+            {editingBook && (
+                <EditBookModal 
+                    book={editingBook}
+                    onClose={() => setEditingBook(null)}
+                    onSave={handleSaveBook}
+                />
+            )}
+        </>
     );
 };
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import AdmitCardModal from '../components/AdmitCardModal';
@@ -139,7 +140,7 @@ const ExamManagement: React.FC = () => {
                         <input type="text" value={examName} onChange={e => setExamName(e.target.value)} required className="w-full p-2 border rounded-md mt-1" />
                     </div>
                     <div>
-                        <label className="font-medium text-sm text-accent">শুরুর তারিখ</label>
+                        <label className="font-medium text-sm text-accent">შুরুর তারিখ</label>
                         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="w-full p-2 border rounded-md mt-1" />
                     </div>
                     <div>
@@ -267,7 +268,7 @@ const ExamManagement: React.FC = () => {
                         </select>
                         <div>
                             <label className="font-medium text-sm text-accent">ছাত্র নির্বাচন করুন (মাল্টি-সিলেক্ট)</label>
-                            <select multiple value={spStudents} onChange={e => setSpStudents(Array.from(e.target.selectedOptions, option => option.value))} required className="w-full h-40 p-2 border rounded-md mt-1">
+                            <select multiple value={spStudents} onChange={e => setSpStudents(Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value))} required className="w-full h-40 p-2 border rounded-md mt-1">
                                 {studentsForPlan.length > 0 ? (
                                     // FIX: Add explicit type for `s` to resolve property access errors.
                                     studentsForPlan.map((s: Student) => <option key={s.id} value={s.id}>{s.name} (রোল: {s.roll})</option>)

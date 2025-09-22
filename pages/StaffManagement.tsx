@@ -1,7 +1,12 @@
+
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import EditStaffModal, { StaffData } from '../components/EditStaffModal';
-import { Teacher, Librarian, DepartmentHead, Class } from '../types';
+import { Teacher, Librarian, DepartmentHead, Class, UserRole } from '../types';
+
+type TeacherWithUser = Teacher & { uid: string; role: UserRole; password?: string; };
+type LibrarianWithUser = Librarian & { uid: string; role: UserRole; password?: string; };
+type DepartmentHeadWithUser = DepartmentHead & { uid: string; role: UserRole; password?: string; };
 
 const StaffManagement: React.FC = () => {
     const { teachers, librarians, departmentHeads, classes, createNewUser } = useApp();
@@ -9,9 +14,12 @@ const StaffManagement: React.FC = () => {
     const [isAdding, setIsAdding] = useState(false);
 
     const allStaff: StaffData[] = useMemo(() => [
-        ...Object.values(teachers).map(t => ({ ...t, role: 'শিক্ষক', details: t.subject } as StaffData)),
-        ...Object.values(librarians).map(l => ({ ...l, role: 'লাইব্রেরিয়ান', details: 'Library' } as StaffData)),
-        ...Object.values(departmentHeads).map(d => ({ ...d, role: 'বিভাগীয় প্রধান', details: d.department } as StaffData)),
+        // FIX: Add explicit type for `t` to resolve property access and spread errors.
+        ...Object.values(teachers).map((t: TeacherWithUser) => ({ ...t, role: 'শিক্ষক', details: t.subject } as StaffData)),
+        // FIX: Add explicit type for `l` to resolve property access and spread errors.
+        ...Object.values(librarians).map((l: LibrarianWithUser) => ({ ...l, role: 'লাইব্রেরিয়ান', details: 'Library' } as StaffData)),
+        // FIX: Add explicit type for `d` to resolve property access and spread errors.
+        ...Object.values(departmentHeads).map((d: DepartmentHeadWithUser) => ({ ...d, role: 'বিভাগীয় প্রধান', details: d.department } as StaffData)),
     ], [teachers, librarians, departmentHeads]);
 
     const handleEdit = (staff: StaffData) => {
@@ -71,7 +79,17 @@ const StaffManagement: React.FC = () => {
                             {allStaff.map(staff => (
                                 <tr key={staff.id} className="border-b">
                                     <td className="p-4 flex items-center gap-3">
-                                        <img src={staff.profilePicUrl || 'https://i.pravatar.cc/150?u=staff'} alt={staff.name} className="w-10 h-10 rounded-full object-cover"/>
+                                        <img 
+                                            src={staff.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(staff.name)}&background=random&color=fff`}
+                                            alt={staff.name} 
+                                            className="w-10 h-10 rounded-full object-cover"
+                                            onError={(e) => {
+                                                const fallbackSrc = 'https://placehold.co/40x40/CCCCCC/FFFFFF?text=Photo';
+                                                if (e.currentTarget.src !== fallbackSrc) {
+                                                    e.currentTarget.src = fallbackSrc;
+                                                }
+                                            }}
+                                        />
                                         <span className="font-medium text-accent">{staff.name}</span>
                                     </td>
                                     <td className="p-4 text-gray-700">{staff.role}</td>

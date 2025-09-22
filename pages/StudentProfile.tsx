@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import IDCardModal from '../components/IDCardModal';
 import { exportHtmlToWord } from '../services/wordExporter';
-import { IssuedBook, StudentPayment, Student } from '../types';
+import { IssuedBook, StudentPayment, Student, FeeInvoice } from '../types';
 
 const StudentProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -32,7 +33,7 @@ const StudentProfile: React.FC = () => {
         .filter((issue: IssuedBook) => issue.studentId === id)
         .map((issue: IssuedBook) => ({ ...issue, bookTitle: library.books[issue.bookId]?.title || 'Unknown Book' }));
 
-    const studentFeeHistory = Object.values(feeInvoices).map(invoice => {
+    const studentFeeHistory = Object.values(feeInvoices).map((invoice: FeeInvoice) => {
         // FIX: Add explicit type for `p` to resolve property access errors.
         const payment = Object.values(studentPayments).find((p: StudentPayment) => p.studentId === id && p.invoiceId === invoice.id);
         return {
@@ -138,10 +139,15 @@ const StudentProfile: React.FC = () => {
         <div className="space-y-8">
             <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col md:flex-row items-center gap-6">
                 <img 
-                    src={student.profilePicUrl || 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png'} 
+                    src={student.profilePicUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random&color=fff&size=128`}
                     alt={student.name} 
                     className="w-32 h-32 rounded-full object-cover border-4 border-secondary"
-                    onError={(e) => (e.currentTarget.src = 'https://i.ibb.co/6yT1WfX/school-logo-placeholder.png')}
+                    onError={(e) => {
+                        const fallbackSrc = 'https://placehold.co/128x128/CCCCCC/FFFFFF?text=Photo';
+                        if (e.currentTarget.src !== fallbackSrc) {
+                            e.currentTarget.src = fallbackSrc;
+                        }
+                    }}
                 />
                 <div className="text-center md:text-left flex-grow">
                     <h2 className="text-3xl font-bold text-primary">{student.name}</h2>

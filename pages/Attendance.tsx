@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Student, Class, Section } from '../types';
@@ -14,13 +15,13 @@ const Attendance: React.FC = () => {
     }, [classes, user]);
 
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
-    const [selectedClass, setSelectedClass] = useState(Object.values(availableClasses)[0]?.name || '');
-    const [selectedSection, setSelectedSection] = useState(Object.values(sections)[0]?.name || '');
+    const [selectedClass, setSelectedClass] = useState((Object.values(availableClasses)[0] as Class)?.name || '');
+    const [selectedSection, setSelectedSection] = useState((Object.values(sections)[0] as Section)?.name || '');
 
     useEffect(() => {
         // FIX: Add explicit type for `c` to resolve property access errors.
         if (!Object.values(availableClasses).some((c: Class) => c.name === selectedClass)) {
-            setSelectedClass(Object.values(availableClasses)[0]?.name || '');
+            setSelectedClass((Object.values(availableClasses)[0] as Class)?.name || '');
         }
     }, [availableClasses, selectedClass]);
 
